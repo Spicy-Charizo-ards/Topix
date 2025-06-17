@@ -1,9 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import {fileURLToPath} from 'url';
+
+//TODO these need to be changed to es import format.
 // const apiRouter = require('./routers/apiRouter.js');
 // const cookieParser = require('cookie-parser');
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
 // * CORS
@@ -13,11 +18,13 @@ app.use(cors());
 app.use(express.json());
 
 //serve index through main folder
-app.use(express.static(path.join(__dirname, '../')));
+app.use(express.static(path.resolve(__dirname, '../src')));
 
 //link router
+//app.use()
 
-
+//! add catch all error handler for incorrect routes
+app.use((req, res) => res.status(404).send('This is not the page you\re looking for.'))
 
 //global error handler
 app.use((err, req, res, next) => {
