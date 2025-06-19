@@ -9,4 +9,4 @@ apiRouter.get();
 //set the cookie when posting
 
 
-module.exports = apiRouter;
+// module.exports = apiRouter;

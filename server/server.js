@@ -1,12 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import {fileURLToPath} from 'url';
+import { fileURLToPath } from 'url';
 
 // api router v
-import apiRouter from './routes/apiRouter';
+// import apiRouter from './routes/apiRouter';
 import cookieParser from 'cookie-parser';
-import WebSocket from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 
 //* creating http server from express for the websocket
 import http from 'http';
@@ -39,14 +39,15 @@ app.use(express.static(path.resolve(__dirname, '../src')));
 //* Websocket Server stuff
 
 //* attach express server to websocket
-const wsServer = new WebSocket.Server({ server: server });
+const wsServer = new WebSocketServer({ server: server });
 
 //TODO websocket logic goes here
 // straight from the npm
 
 wsServer.on('connection', (ws) => {
     //print to console when connection is made
-    console.log('client connected to server!')
+    console.log('server: client connected to server!')
+
     //console log error if there is an error connecting
     ws.on('error', console.error);
 
@@ -56,8 +57,8 @@ wsServer.on('connection', (ws) => {
         ws.send('Got your message, it was:', data)
     });
 
-    //send 'something' to the client
-    ws.send('something');
+    //send something to the client
+    ws.send('hello from the server');
 })
 
 
@@ -76,5 +77,5 @@ app.use((err, req, res, next) => {
   return res.status(errorObj.status).json(errorObj.message);
 });
 
-// server listens for the ports and not app
+// server listens for the ports now, app is included in this too
 server.listen(3000, ()=>console.log('server listening on port 3000'));
