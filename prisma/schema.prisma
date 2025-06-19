@@ -22,54 +22,51 @@ model User {
   name      String
 
   // ! assuming user can only be in one active chat room
-  activeChatRoomId Int?
-  activeChatRoom   ChatRoom? @relation("ActiveUsers", fields: [activeChatRoomId], references: [id])
+  activeRoomId Int?
+  activeRoom   Room? @relation("ActiveUsers", fields: [activeRoomId], references: [id])
 
   // ! assuming user can create multiple chat rooms
-  createdChatRooms ChatRoom[] @relation("CreatedRooms")
-  messages         Message[]
+  createdRooms Room[]    @relation("CreatedRooms")
+  messages     Message[]
 
-/*
+  /**
    * RELATIONSHIPS:
    * - One user can be active in zero or one chat room (activeChatRoom)
    * - One user can create multiple chat rooms (createdChatRooms)
    * - One user can send multiple messages (messages)
-
-  * LOGIC
+   * LOGIC
    * - User must have unique email address
    * - User can only be active in one room at a time
    * - When user joins a new room, they automatically leave their current room
    * - User who creates a room becomes the room creator/admin
-*/
-
+   */
 }
 
-model ChatRoom {
+model Room {
   // specs 
-  id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now())
-  creatorId   Int
-  creator     User      @relation("CreatedRooms", fields: [creatorId], references: [id])
+  id             Int       @id @default(autoincrement())
+  createdAt      DateTime  @default(now())
+  creatorId      Int
+  creator        User      @relation("CreatedRooms", fields: [creatorId], references: [id])
   // settings 
-  name        String
-  isActive    Boolean   @default(true)
-  activeUsers User[]    @relation("ActiveUsers")
+  name           String
+  isActive       Boolean   @default(true)
+  activeUsers    User[]    @relation("ActiveUsers")
   // privacy settings 
-  private     Boolean   @default(false)
+  private        Boolean   @default(false)
   passwordPrompt String?
-  password    String?
-  description String?
-  messages    Message[]
+  password       String?
+  description    String?
+  messages       Message[]
 
-  /* 
+  /**
    * RELATIONSHIPS:
-   * - One chat room belongs to one creator (creator)
-   * - One chat room can have multiple active users (activeUsers)
-   * - One chat room can have multiple messages (messages)
-   * 
+   * - One room belongs to one creator (creator)
+   * - One room can have multiple active users (activeUsers)
+   * - One room can have multiple messages (messages)
    * LOGIC:
-   ! How does room stay open when admin leaves? Set away status vs Close room status?
-   ! Can a user reactivate a room? 
+   * ! How does room stay open when admin leaves? Set away status vs Close room status?
+   * ! Can a user reactivate a room?
    * - Room has a creator who has admin privileges
    * - Only room creator can deactivate/modify room settings
    * - Private rooms require password to create and join
@@ -79,25 +76,23 @@ model ChatRoom {
 }
 
 model Message {
-  id         Int      @id @default(autoincrement())
-  createdAt  DateTime @default(now())
-  authorId   Int
-  author     User     @relation(fields: [authorId], references: [id])
-  chatRoomId Int
-  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
-  content    String?
-  imageUrl   String?
-  
-    /* 
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  roomId    Int
+  room      Room     @relation(fields: [roomId], references: [id])
+  content   String?
+  imageUrl  String?
+
+  /**
    * RELATIONSHIPS:
    * - One message belongs to one author (author)
    * - One message belongs to one chat room (chatRoom)
-   * 
    * LOGIC:
    * - Message must have either text content or image URL (or both)
    * - Only the message author or room creator can delete messages
    * - Author must be actively in the chat room to send messages
-   * 
    * MESSAGE CONTENT TYPES:
    * - Text message: content field populated, imageUrl null
    * - Image message: imageUrl field populated, content may be null
