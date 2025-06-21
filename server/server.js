@@ -42,24 +42,54 @@ app.use(express.static(path.resolve(__dirname, '../src')));
 const wsServer = new WebSocketServer({ server: server });
 
 //TODO websocket logic goes here
-// straight from the npm
 
+//* Basically the server is just rerouting messages from the client back to the appropriate clients. (the ones in the chatrooms that messages go to)
+
+//when a new connection is made to the server...
 wsServer.on('connection', (ws) => {
+
+    //TODO: assign the current ws socket an id. probably from the DB to identify connections. The clients might send this information after authenticating
+    // i.e: wd.id = some data pulled from the 'NEW_USER' message from client
+
+    //**TODO: put the user in a chatroom. The client sends messages with target chatroom in them to server
+    //TODO: the chatroom is a map or a set that holds all users inside
+
     //print to console when connection is made
     console.log('server: client connected to server!')
 
     //console log error if there is an error connecting
     ws.on('error', console.error);
 
-    //after receiving a message from client send back the message after printing on console
+    //after receiving a message from client route it back to everyone exept the sender
     ws.on('message', function incoming(data){
-        console.log('received: %s', data);
-        ws.send('Got your message, it was:', data)
+        //for each client connected to the server socket, broadcast the recieved message to them all
+        broadcastMsg(data, ws)
+
+        //TODO: BIG switch statement here that controls what happens with user messages. all the db queries for user and room info go here too.
+        switch(type){
+            case 'NEW_USER':
+                break;
+            
+            default:
+                break;
+        }
     });
 
-    //send something to the client
-    ws.send('hello from the server');
-})
+    // //send something to the client just because
+    // // ws.send('hello from the server');
+});
+
+//*This just broadcasts to each user barring a specified socket which is supposed to be the user who sent the message in the first place.
+//may need to be changed at some point.
+function broadcastMsg(data, ignoredSocket){
+    wsServer.clients.forEach((client)=>{
+        //as long as the socket is connected (its readyState is OPEN) AND it is not the socket that sent the message (ignoredSocket), send the message back to the other clients
+        if(ws.readyState === WebSocket.OPEN && client !== ignoredSocket){
+            client.send(data);
+        }
+    })     
+
+}
 
 
 //! add catch all error handler for incorrect routes
