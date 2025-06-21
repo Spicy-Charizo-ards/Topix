@@ -6,7 +6,20 @@ const prisma = new PrismaClient();
  * OR
  * Return array of all active public rooms. each room has id, name,  user count, password prompt
  */
-export const getRooms = () => {};
+export const getRooms = (roomType) => {
+if (roomType==="private") {
+    
+}
 
-/** */
-export const createRoom = () => {};
+};
+
+/** 
+ * input: userId, roomName, description, isPrivate, password prompt?, password?
+ * return: id
+*/
+export const createRoom = (userId, roomName, roomDescription, isPrivate, passwordPrompt, password) => {
+// check that all required values are valid 
+// check if room already exists 
+// access room table and add room with details 
+
+};

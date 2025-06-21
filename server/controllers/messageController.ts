@@ -5,7 +5,9 @@ const prisma = new PrismaClient();
  * input: userId, roomId, content (text or emoji or image)
  * return: messageID
  */
-const createMessage = () => {}
+const createMessage = (userId, roomId, content, imgUrl, ) => {
+    // check 
+}
 
 /** 
  * input: messageID
