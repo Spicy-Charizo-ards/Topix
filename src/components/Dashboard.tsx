@@ -1,15 +1,76 @@
 import { useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
+import ChatWindow from './ChatWindow';
 
 type TabType = 'private' | 'public' | 'invites';
 
+interface Message {
+  id: string;
+  text: string;
+  sender: string;
+  timestamp: Date;
+  isOwn: boolean;
+}
+
+interface ChatRoom {
+  id: string;
+  name: string;
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
+  messages: Message[];
+}
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
+  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
+    {
+      id: '1',
+      name: 'Wenjun',
+      lastMessage: 'Hey, how are you?',
+      lastMessageTime: new Date(Date.now() - 300000),
+      unreadCount: 2,
+      messages: [
+        {
+          id: '1',
+          text: 'Hey everyone! I will not be here today.',
+          sender: 'Wenjun',
+          timestamp: new Date(Date.now() - 300000),
+          isOwn: false,
+        },
+      ],
+    },
+  ]);
+
+  const selectedChatRoom = chatRooms.find((chat) => chat.id === selectedChat);
+
+  const handleSendMessage = (messageText: string) => {
+    if (!selectedChatRoom) return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      text: messageText,
+      sender: 'You',
+      timestamp: new Date(),
+      isOwn: true,
+    };
+
+    // Update the selected chat room's messages
+    setChatRooms((prev) =>
+      prev.map((chat) =>
+        chat.id === selectedChat
+          ? { ...chat, messages: [...chat.messages, newMessage] }
+          : chat
+      )
+    );
+  };
 
   return (
     <div className="w-full min-h-screen">
-      <div className="w-full bg-amber-900">
+      <div className="w-full bg-orange-950">
         <div className="flex items-center justify-between">
           <div className="flex gap-4">
             <button onClick={() => setActiveTab('private')}>
@@ -34,26 +95,59 @@ const Dashboard = () => {
       {/* Content Area */}
       <div className="w-full mx-auto px-4 py-6">
         {activeTab === 'private' && (
-          <div className="w-full bg-white rounded-lg p-6">
+          <div className="w-full rounded-lg p-6">
             <h2 className="text-lg font-medium mb-4">Your Chats</h2>
-            <div className="space-y-4">
-              <div className="flex items-center p-4 border rounded-lg">
-                <Avatar className="mr-4" />
-                <div>
-                  <h3 className="font-medium">Wenjun</h3>
-                  <p className="text-sm text-gray-500">
-                    Last message: Hey, how are you?
-                  </p>
+
+            <div className="flex h-96">
+              {/* Chat List - Left Side */}
+              <div className="w-1/4 border-r pr-4">
+                <div className="space-y-2">
+                  {chatRooms.map((chat) => (
+                    <div
+                      key={chat.id}
+                      onClick={() => setSelectedChat(chat.id)}
+                      className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                        selectedChat === chat.id
+                          ? 'bg-stone-100 border-l-4 border-amber-800'
+                          : ''
+                      }`}
+                    >
+                      <Avatar className="mr-3" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-medium text-neutral-500 truncate">{chat.name}</h3>
+                        </div>
+                        <p className="text-sm text-gray-500 truncate">
+                          {chat.lastMessage}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {chat.lastMessageTime.toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="flex items-center p-4 border rounded-lg">
-                <Avatar className="mr-4" />
-                <div>
-                  <h3 className="font-medium">Unknown</h3>
-                  <p className="text-sm text-gray-500">
-                    Last message: See you tomorrow!
-                  </p>
-                </div>
+
+              {/* Chat Window - Right Side */}
+              <div className="w-3/4 pl-4">
+                {selectedChat ? (
+                  <ChatWindow
+                    roomName={selectedChatRoom?.name || ''}
+                    messages={selectedChatRoom?.messages || []}
+                    onSendMessage={handleSendMessage}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="text-center">
+                      <Chat className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>Select a chat to start messaging</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
