@@ -2,6 +2,19 @@
 //* I built it here so that it can be plugged in wherever it needs to go without messing over someone else's files
 //* inside there are notes for what everything is and does
 
+//TODO: make interfaces for the messages for type safety
+// interface Payload {
+//     message: string,
+//     //userId: string?
+//     //DateCreated: datestring?
+// }
+
+// interface MessageData {
+//     type: string,
+//     payload: Payload
+// }
+
+
 // needs a url, in this case its the local host at 3000 because thats where the backend ws server is listening to.
 //! we may have to change this later if we get the app hosted on an aws server.
 const wsConnection = new WebSocket('ws://localhost:3000');
@@ -17,7 +30,7 @@ function wsClient(){
 
         //tell server that a new user has connected
         const data = {
-            type: 'NEW_USER',
+            type: 'NEW_USER'
         }
 
         //send the data to server
