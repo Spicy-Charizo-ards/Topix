@@ -3,16 +3,18 @@
 //* inside there are notes for what everything is and does
 
 //TODO: make interfaces for the messages for type safety
-// interface Payload {
-//     message: string,
-//     //userId: string?
-//     //DateCreated: datestring?
-// }
+interface Payload {
+    msgID?: string;
+    message?: string;
+    user?: string;
+    timestamp?: Date;
+    roomName?: string;
+}
 
-// interface MessageData {
-//     type: string,
-//     payload: Payload
-// }
+interface MessageData {
+    type: string;
+    payload?: Payload;
+}
 
 
 // needs a url, in this case its the local host at 3000 because thats where the backend ws server is listening to.
@@ -71,19 +73,39 @@ function wsClient(){
     }
 }
 
+//* using this to determine what gets sent to server for chatroom messages
+// interface Message {
+//     id: string;
+//     text: string;
+//     sender: string;
+//     timestamp: Date;
+//     isOwn: boolean;
+// }
+  
+// interface ChatWindowProps {
+//     roomName?: string;
+//     messages?: Message[];
+//     onSendMessage?: (message: string) => void;
+// }
+  
+
 //* this is to send messages to the server, more than just this type of message can be sent but here is a preliminary one
 //msg is the text string the user will send, in this case its empty for now
-function sendMsgToServer(msg = ''){
-    //now it has a test message to send to server.
-    msg = 'Hello, this is a test'
+function sendChatToServer(msg: Payload){
+    //destructure msg so parts can be sent to the server.
+    const { msgID, message, user, timestamp, roomName } = msg;
 
     //* this kind of uses redux action formatting, the server will kind of resemble a redux reducer.
-    const msgToSend = {
+    const msgToSend: MessageData = {
         //type is whats happening
-        type: 'SEND_MESSAGE',
+        type: 'SEND_CHAT',
         //payload is whats being sent to server. In this case, only the test message string is being sent.
         payload:{
-            message: msg,
+            msgID: msgID,
+            message: message,
+            user: user,
+            timestamp: timestamp,
+            roomName: roomName
         }
     }
     //* websockets can only send strings
@@ -92,4 +114,4 @@ function sendMsgToServer(msg = ''){
 }
 
 //* exporting module for front end component imports
-export { wsClient, sendMsgToServer };
+export { wsClient, sendChatToServer };

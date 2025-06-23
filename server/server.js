@@ -66,10 +66,20 @@ wsServer.on('connection', (ws) => {
         broadcastMsg(data, ws)
 
         //TODO: BIG switch statement here that controls what happens with user messages. all the db queries for user and room info go here too.
+        //some of these might end up being routes instead.
         switch(type){
             case 'NEW_USER':
+                //add user to DB
                 break;
-            
+            case 'JOIN_USER':
+                //add user to a chat in db
+                break;
+            case 'SEND_CHAT':
+                //add chat to db and broadcast to members of that chat
+                break;
+            case 'CREATE_ROOM':
+                //add room to DB
+                break;
             default:
                 break;
         }
