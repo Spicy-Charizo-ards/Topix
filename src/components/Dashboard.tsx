@@ -16,9 +16,6 @@ interface Message {
 interface ChatRoom {
   id: string;
   name: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  unreadCount: number;
   messages: Message[];
 }
 
@@ -29,10 +26,7 @@ const Dashboard = () => {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
       id: '1',
-      name: 'Wenjun',
-      lastMessage: 'Hey, how are you?',
-      lastMessageTime: new Date(Date.now() - 300000),
-      unreadCount: 2,
+      name: 'Charizard',
       messages: [
         {
           id: '1',
@@ -93,11 +87,12 @@ const Dashboard = () => {
       </div>
 
       {/* Content Area */}
-      <div className="w-full mx-auto px-4 py-6">
+      <div className="w-full px-4 py-6">
         {activeTab === 'private' && (
-          <div className="w-full rounded-lg p-6">
-            <h2 className="text-lg font-medium mb-4">Your Chats</h2>
-
+          <div className="w-full bg-white rounded-lg p-6">
+            <h2 className="text-lg text-amber-900 font-medium mb-4">
+              Your Chats
+            </h2>
             <div className="flex h-96">
               {/* Chat List - Left Side */}
               <div className="w-1/4 border-r pr-4">
@@ -108,25 +103,15 @@ const Dashboard = () => {
                       onClick={() => setSelectedChat(chat.id)}
                       className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
                         selectedChat === chat.id
-                          ? 'bg-stone-100 border-l-4 border-amber-800'
+                          ? 'bg-stone-100'
                           : ''
                       }`}
                     >
-                      <Avatar className="mr-3" />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-medium text-neutral-500 truncate">{chat.name}</h3>
+                          <h3 className="font-medium text-neutral-500 truncate">
+                            {chat.name}
+                          </h3>
                         </div>
-                        <p className="text-sm text-gray-500 truncate">
-                          {chat.lastMessage}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {chat.lastMessageTime.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -154,18 +139,20 @@ const Dashboard = () => {
         )}
         {activeTab === 'public' && (
           <div className="w-full bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-medium mb-4">Popular Topics</h2>
+            <h2 className="text-lg text-amber-900 font-medium mb-4">
+              Popular Topics
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="p-4 border rounded-lg">
-                <h3 className="font-medium">Technology</h3>
+                <h3 className="text-amber-900 font-medium">Technology</h3>
                 <p className="text-sm text-gray-500">1.2k members</p>
               </div>
               <div className="p-4 border rounded-lg">
-                <h3 className="font-medium">Gaming</h3>
+                <h3 className="text-amber-900 font-medium">Gaming</h3>
                 <p className="text-sm text-gray-500">3.5k members</p>
               </div>
               <div className="p-4 border rounded-lg">
-                <h3 className="font-medium">Music</h3>
+                <h3 className="text-amber-900 font-medium">Music</h3>
                 <p className="text-sm text-gray-500">2.8k members</p>
               </div>
             </div>
@@ -173,13 +160,15 @@ const Dashboard = () => {
         )}
         {activeTab === 'invites' && (
           <div className="w-full bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-medium mb-4">Chat Invitations</h2>
+            <h2 className="text-lg text-amber-900 font-medium mb-4">
+              Chat Invitations
+            </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center">
                   <Avatar className="mr-4" />
                   <div>
-                    <h3 className="font-medium">
+                    <h3 className="text-amber-900 font-medium">
                       AI Conventional Commits Dev Tool
                     </h3>
                     <p className="text-sm text-gray-500">Invited by Alicia</p>
@@ -189,7 +178,7 @@ const Dashboard = () => {
                   <button className="px-4 py-2 boarder border-blue-600 text-blue-600 rounded-md">
                     Accept
                   </button>
-                  <button className="px-4 py-2 border rounded-md">
+                  <button className="px-4 py-2 text-neutral-500">
                     Decline
                   </button>
                 </div>
