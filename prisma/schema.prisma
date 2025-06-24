@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  username  String
+  name      String
+
+  // ! assuming user can only be in one active chat room
+  activeRoomId Int?
+  activeRoom   Room? @relation("ActiveUsers", fields: [activeRoomId], references: [id])
+
+  // ! assuming user can create multiple chat rooms
+  createdRooms Room[]    @relation("CreatedRooms")
+  messages     Message[]
+
+  invitesSent       Invitation[] @relation("InvitesSent")
+  invitatesReceived Invitation[] @relation("InvitesReceived")
+
+  /**
+   * RELATIONSHIPS:
+   * - One user can be active in zero or one chat room (activeChatRoom)
+   * - One user can create multiple chat rooms (createdChatRooms)
+   * - One user can send multiple messages (messages)
+   * LOGIC
+   * - User must have unique email address
+   * - User can only be active in one room at a time
+   * - When user joins a new room, they automatically leave their current room
+   * - User who creates a room becomes the room creator/admin
+   */
+}
+
+model Room {
+  // specs 
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  creatorId      Int
+  creator        User         @relation("CreatedRooms", fields: [creatorId], references: [id])
+  // settings 
+  name           String
+  isActive       Boolean      @default(true)
+  activeUsers    User[]       @relation("ActiveUsers")
+  // privacy settings 
+  private        Boolean      @default(false)
+  passwordPrompt String?
+  password       String?
+  description    String?
+  messages       Message[]
+  invites        Invitation[]
+
+  /**
+   * RELATIONSHIPS:
+   * - One room belongs to one creator (creator)
+   * - One room can have multiple active users (activeUsers)
+   * - One room can have multiple messages (messages)
+   * LOGIC:
+   * ! How does room stay open when admin leaves? Set away status vs Close room status?
+   * ! Can a user reactivate a room?
+   * - Room has a creator who has admin privileges
+   * - Only room creator can deactivate/modify room settings
+   * - Private rooms require password to create and join
+   * - Users can only join active rooms
+   * - Users can browse and join public rooms without restrictions
+   */
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  authorId  Int
+  author    User     @relation(fields: [authorId], references: [id])
+  roomId    Int
+  room      Room     @relation(fields: [roomId], references: [id])
+  content   String?
+  imageUrl  String?
+
+  /**
+   * RELATIONSHIPS:
+   * - One message belongs to one author (author)
+   * - One message belongs to one chat room (chatRoom)
+   * LOGIC:
+   * - Message must have either text content or image URL (or both)
+   * - Only the message author or room creator can delete messages
+   * - Author must be actively in the chat room to send messages
+   * MESSAGE CONTENT TYPES:
+   * - Text message: content field populated, imageUrl null
+   * - Image message: imageUrl field populated, content may be null
+   * - Mixed message: both content and imageUrl populated
+   */
+}
+
+model Invitation {
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime     @default(now())
+  senderId   Int
+  sender     User         @relation("InvitesSent", fields: [senderId], references: [id])
+  receiverId Int
+  receiver   User         @relation("InvitesReceived", fields: [receiverId], references: [id])
+  roomId     Int
+  room       Room         @relation(fields: [roomId], references: [id])
+  status     InviteStatus @default(PENDING)
+
+  @@unique([senderId, receiverId, roomId]) // Prevent duplicate invitations
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
