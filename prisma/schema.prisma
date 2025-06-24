@@ -17,9 +17,10 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
+  name      String
   email     String   @unique
   username  String
-  name      String
+  password  String
 
   // ! assuming user can only be in one active chat room
   activeRoomId Int?
