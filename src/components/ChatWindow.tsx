@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
-import { wsClient } from '../wsClient';
+// import { wsClient } from '../wsClient';
 
 interface Message {
   mID: string;
@@ -27,7 +27,6 @@ interface ChatWindowProps {
 const ChatWindow = ({
   roomName = 'General Chat',
   messages = [],
-  user,
   onSendMessage,
 }: ChatWindowProps) => {
   const [inputMessage, setInputMessage] = useState('');
@@ -41,10 +40,7 @@ const ChatWindow = ({
     scrollToBottom();
   }, [messages]);
 
-  //* CONNECT CLIENT TO SOCKET
-  useEffect(() => {
-    wsClient(user);
-  }, []);
+ //!Removed connect chat to client from here
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && onSendMessage) {

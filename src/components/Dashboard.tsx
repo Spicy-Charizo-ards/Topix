@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
-import { sendChatToServer } from '../wsClient';
+import { wsClient } from '../wsClient';
 
 type TabType = 'private' | 'public' | 'invites';
+
+//* Websocket wrapper
+interface chatClient {
+  socket: WebSocket;
+  sendChatToServer: (message: Message, room: ChatRoom)=> void;
+}
 
 interface Message {
   mID: string;
@@ -27,6 +33,7 @@ interface User {
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
+  const [chatClientWS, setChatClientWS] = useState<chatClient>();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   //*Creating fake user to connect to socket
   const [currentUser, setCurrentUser] = useState<User>({
@@ -51,6 +58,12 @@ const Dashboard = () => {
 
   const selectedChatRoom = chatRooms.find((chat) => chat.roomID === selectedChat);
 
+  //placing this here
+  useEffect(()=>{
+    const chatWS = wsClient(currentUser);
+    setChatClientWS(chatWS);
+  },[]);
+
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
 
@@ -63,7 +76,7 @@ const Dashboard = () => {
     };
 
     //* SENDING MESSAGE TO SERVER USING SEND MESSAGE HANDLER
-    sendChatToServer(newMessage, selectedChatRoom);
+    chatWS.sendChatToServer(newMessage, selectedChatRoom);
 
     // Update the selected chat room's messages
     setChatRooms((prev) =>

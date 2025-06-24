@@ -6,7 +6,7 @@
 interface Payload {
     msgID?: string;
     message?: string;
-    user?: string[];
+    user?: string;
     timestamp?: Date;
     roomName?: string;
 }
@@ -38,6 +38,7 @@ interface Message {
 
   
   //handles websocket connection logic "what is the client sending to the server and how will it handle what it gets back"
+  //*user is being passed in so that the onopen function can send it to the server and get client assigned to a user for easy sorting.
   function wsClient(userArg: User){
     // needs a url, in this case its the local host at 3000 because thats where the backend ws server is listening to.
     //! we may have to change this later if we get the app hosted on an aws server.
@@ -46,6 +47,41 @@ interface Message {
     //* Websocket commands are methods that you have to define with logic. onopen, onmessage, onclose are a few of the important ones
     //when the connection first opens...
     
+
+    //*define a class/object with methods for using the websocket client
+
+    class chatClient {
+        //TypeScript strict typing for the class
+        socket: WebSocket;
+
+        //assigning the class socket property to the wsConnection so it can be used by the sendChatToServer method
+        constructor(){
+            this.socket = wsConnection;
+        }
+
+        sendChatToServer(msg: Message, room: ChatRoom){
+            //destructure msg so parts can be sent to the server.
+            const { mID, text, sender, timestamp } = msg;
+            const { roomID } = room;
+        
+            //* this kind of uses redux action formatting, the server will kind of resemble a redux reducer.
+            const msgToSend: MessageData = {
+                //type is whats happening
+                type: 'SEND_CHAT',
+                //payload is whats being sent to server. In this case, only the test message string is being sent.
+                payload:{
+                    msgID: mID,
+                    message: text,
+                    user: sender,
+                    timestamp: timestamp,
+                    roomName: roomID
+                }
+            }
+            //* websockets can only send strings
+            // stringify the message. The Server will parse it with JSON.parse()
+            wsConnection.send(JSON.stringify(msgToSend));
+        }
+    }
 
     //*user passed into data to be sent as a message to server
     const { userID, userName } = userArg;
@@ -94,6 +130,8 @@ interface Message {
                 break;
         }
     }
+
+    return new chatClient();
 }
 
 //* using this to determine what gets sent to server for chatroom messages
@@ -114,28 +152,28 @@ interface Message {
 
 //* this is to send messages to the server, more than just this type of message can be sent but here is a preliminary one
 //msg is the text string the user will send, in this case its empty for now
-function sendChatToServer(msg: Message, room: ChatRoom){
-    //destructure msg so parts can be sent to the server.
-    const { mID, text, sender, timestamp } = msg;
-    const { roomID } = room;
+// function sendChatToServer(msg: Message, room: ChatRoom){
+//     //destructure msg so parts can be sent to the server.
+//     const { mID, text, sender, timestamp } = msg;
+//     const { roomID } = room;
 
-    //* this kind of uses redux action formatting, the server will kind of resemble a redux reducer.
-    const msgToSend: MessageData = {
-        //type is whats happening
-        type: 'SEND_CHAT',
-        //payload is whats being sent to server. In this case, only the test message string is being sent.
-        payload:{
-            msgID: mID,
-            message: text,
-            user: sender,
-            timestamp: timestamp,
-            roomName: roomID
-        }
-    }
-    //* websockets can only send strings
-    // stringify the message. The Server will parse it with JSON.parse()
-    wsConnection.send(JSON.stringify(msgToSend));
-}
+//     //* this kind of uses redux action formatting, the server will kind of resemble a redux reducer.
+//     const msgToSend: MessageData = {
+//         //type is whats happening
+//         type: 'SEND_CHAT',
+//         //payload is whats being sent to server. In this case, only the test message string is being sent.
+//         payload:{
+//             msgID: mID,
+//             message: text,
+//             user: sender,
+//             timestamp: timestamp,
+//             roomName: roomID
+//         }
+//     }
+//     //* websockets can only send strings
+//     // stringify the message. The Server will parse it with JSON.parse()
+//     wsConnection.send(JSON.stringify(msgToSend));
+// }
 
 //* exporting module for front end component imports
-export { wsClient, sendChatToServer };
+export { wsClient };
