@@ -73,6 +73,7 @@ wsServer.on('connection', (ws) => {
                 break;
             case 'JOIN_USER':
                 //add user to a chat in db
+                //assign some sort of id to the client socket
                 break;
             case 'SEND_CHAT':
                 //add chat to db and broadcast to members of that chat
@@ -108,6 +109,7 @@ app.use('/test', (req, res) => {
 
 //! add catch all error handler for incorrect routes
 app.use((req, res) => res.status(404).send('This is not the page you\re looking for.'))
+
 
 
 //global error handler

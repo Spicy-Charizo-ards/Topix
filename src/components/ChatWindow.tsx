@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
+import { wsClient } from '../wsClient';
 
 interface Message {
   id: string;
@@ -31,6 +32,10 @@ const ChatWindow = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+  //connect client to socket
+  useEffect(() => {
+    wsClient();
+  }, []);
 
   const handleSendMessage = () => {
     if (inputMessage.trim() && onSendMessage) {
