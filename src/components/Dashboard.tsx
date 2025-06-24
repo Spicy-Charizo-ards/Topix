@@ -76,7 +76,7 @@ const Dashboard = () => {
     };
 
     //* SENDING MESSAGE TO SERVER USING SEND MESSAGE HANDLER
-    chatWS.sendChatToServer(newMessage, selectedChatRoom);
+    chatClientWS.sendChatToServer(newMessage, selectedChatRoom);
 
     // Update the selected chat room's messages
     setChatRooms((prev) =>

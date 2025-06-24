@@ -40,8 +40,6 @@ const ChatWindow = ({
     scrollToBottom();
   }, [messages]);
 
- //!Removed connect chat to client from here
-
   const handleSendMessage = () => {
     if (inputMessage.trim() && onSendMessage) {
       onSendMessage(inputMessage.trim());
