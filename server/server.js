@@ -11,6 +11,10 @@ import { WebSocket, WebSocketServer } from 'ws';
 //* creating http server from express for the websocket
 import http from 'http';
 
+// import db functions
+import {createUser} from "./controllers/authController.ts"
+import {createRoom} from "./controllers/roomController.ts"
+import {createMessage} from "./controllers/messageController.ts"
 
 //TODO these need to be changed to es import format.
 // const cookieParser = require('cookie-parser');
@@ -61,7 +65,7 @@ wsServer.on('connection', (ws) => {
     ws.on('error', console.error);
 
     //after receiving a message from client route it back to everyone exept the sender
-    ws.on('message', function incoming(data){
+    ws.on('message', async function incoming(data){
         //for each client connected to the server socket, broadcast the recieved message to them all
         broadcastMsg(data, ws)
 
@@ -69,17 +73,19 @@ wsServer.on('connection', (ws) => {
         //some of these might end up being routes instead.
         switch(type){
             case 'NEW_USER':
-                //add user to DB
-                break;
+              await createUser(name, email, username, password)
+                 break;
             case 'JOIN_USER':
                 //add user to a chat in db
                 //assign some sort of id to the client socket
                 break;
             case 'SEND_CHAT':
                 //add chat to db and broadcast to members of that chat
+                await createMessage(userId, roomId, content, imgUrl)
                 break;
             case 'CREATE_ROOM':
                 //add room to DB
+                await createRoom(userId, roomName, roomDescription)
                 break;
             default:
                 break;
@@ -102,9 +108,37 @@ function broadcastMsg(data, ignoredSocket){
 
 }
 
-app.use('/test', (req, res) => {
-  console.log('test end point working ')
-  return res.send("test endpoint working")
+app.use('/test', async (req, res) => {
+  const mockUser = {
+    email: "frank.reynolds@paddys.com",
+    username: "frank",
+    name: "Frank Reynolds",
+    password: "trolltoll",
+  }
+
+  const mockRoom = {
+    name: "Paddy's Pub",
+    description: "The official chat room of the Gang. Expect chaos.",
+    creatorId: 1,
+  };
+
+  const mockMessage =   {
+    authorId: 1,
+    content: "Can I offer you an egg in this trying time?",
+    roomId: 1,
+}
+
+  // const createdUser = await createUser(mockUser.name, mockUser.email, mockUser.username, mockUser.password)
+  // console.log({createdUser})
+  // return res.send({data: createdUser})
+  
+  // const createdRoom = await createRoom(1, mockRoom.name, mockRoom.description)
+  // console.log(createdRoom)
+  // return res.send({data: createdRoom})
+  
+  const createdMessage = await createMessage(1, 1, mockMessage.content)
+  console.log(createdMessage)
+  return res.send({data: createdMessage})
 })
 
 //! add catch all error handler for incorrect routes

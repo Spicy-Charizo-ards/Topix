@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -17,9 +16,11 @@ datasource db {
 model User {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
+  name      String
   email     String   @unique
   username  String
-  name      String
+  password  String
+  isActive  Boolean  @default(false)
 
   // ! assuming user can only be in one active chat room
   activeRoomId Int?
@@ -56,7 +57,7 @@ model Room {
   isActive       Boolean      @default(true)
   activeUsers    User[]       @relation("ActiveUsers")
   // privacy settings 
-  private        Boolean      @default(false)
+  isPrivate        Boolean      @default(false)
   passwordPrompt String?
   password       String?
   description    String?
