@@ -4,7 +4,7 @@ import { Send } from '@mui/icons-material';
 import { wsClient } from '../wsClient';
 
 interface Message {
-  id: string;
+  mID: string;
   text: string;
   sender: string;
   timestamp: Date;
@@ -32,7 +32,8 @@ const ChatWindow = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  //connect client to socket
+
+  //* CONNECT CLIENT TO SOCKET
   useEffect(() => {
     wsClient();
   }, []);
@@ -69,7 +70,7 @@ const ChatWindow = ({
         ) : (
           messages.map((message) => (
             <div
-              key={message.id}
+              key={message.mID}
               className={`flex ${
                 message.isOwn ? 'justify-end' : 'justify-start'
               }`}

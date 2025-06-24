@@ -16,6 +16,20 @@ interface MessageData {
     payload?: Payload;
 }
 
+//interfaces for some stuff i need for sending messages to server
+interface Message {
+    mID: string;
+    text: string;
+    sender: string;
+    timestamp: Date;
+    isOwn: boolean;
+  }
+  
+  interface ChatRoom {
+    roomID: string;
+    name: string;
+    messages: Message[];
+  }
 
 // needs a url, in this case its the local host at 3000 because thats where the backend ws server is listening to.
 //! we may have to change this later if we get the app hosted on an aws server.
@@ -88,9 +102,10 @@ function wsClient(){
 
 //* this is to send messages to the server, more than just this type of message can be sent but here is a preliminary one
 //msg is the text string the user will send, in this case its empty for now
-function sendChatToServer(msg: Payload){
+function sendChatToServer(msg: Message, room: ChatRoom){
     //destructure msg so parts can be sent to the server.
-    const { msgID, message, user, timestamp, roomName } = msg;
+    const { mID, text, sender, timestamp } = msg;
+    const { roomID } = room;
 
     //* this kind of uses redux action formatting, the server will kind of resemble a redux reducer.
     const msgToSend: MessageData = {
@@ -98,11 +113,11 @@ function sendChatToServer(msg: Payload){
         type: 'SEND_CHAT',
         //payload is whats being sent to server. In this case, only the test message string is being sent.
         payload:{
-            msgID: msgID,
-            message: message,
-            user: user,
+            msgID: mID,
+            message: text,
+            user: sender,
             timestamp: timestamp,
-            roomName: roomName
+            roomName: roomID
         }
     }
     //* websockets can only send strings

@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
+import { sendChatToServer } from '../wsClient';
 
 type TabType = 'private' | 'public' | 'invites';
 
 interface Message {
-  id: string;
+  mID: string;
   text: string;
   sender: string;
   timestamp: Date;
@@ -14,7 +15,7 @@ interface Message {
 }
 
 interface ChatRoom {
-  id: string;
+  roomID: string;
   name: string;
   messages: Message[];
 }
@@ -25,11 +26,11 @@ const Dashboard = () => {
 
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
-      id: '1',
+      roomID: '1',
       name: 'Charizard',
       messages: [
         {
-          id: '1',
+          mID: '1',
           text: 'Hey everyone! I will not be here today.',
           sender: 'Wenjun',
           timestamp: new Date(Date.now() - 300000),
@@ -39,23 +40,26 @@ const Dashboard = () => {
     },
   ]);
 
-  const selectedChatRoom = chatRooms.find((chat) => chat.id === selectedChat);
+  const selectedChatRoom = chatRooms.find((chat) => chat.roomID === selectedChat);
 
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
 
     const newMessage: Message = {
-      id: Date.now().toString(),
+      mID: Date.now().toString(),
       text: messageText,
       sender: 'You',
       timestamp: new Date(),
       isOwn: true,
     };
 
+    //* SENDING MESSAGE TO SERVER USING SEND MESSAGE HANDLER
+    sendChatToServer(newMessage, selectedChatRoom);
+
     // Update the selected chat room's messages
     setChatRooms((prev) =>
       prev.map((chat) =>
-        chat.id === selectedChat
+        chat.roomID === selectedChat
           ? { ...chat, messages: [...chat.messages, newMessage] }
           : chat
       )
@@ -99,10 +103,10 @@ const Dashboard = () => {
                 <div className="space-y-2">
                   {chatRooms.map((chat) => (
                     <div
-                      key={chat.id}
-                      onClick={() => setSelectedChat(chat.id)}
+                      key={chat.roomID}
+                      onClick={() => setSelectedChat(chat.roomID)}
                       className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                        selectedChat === chat.id
+                        selectedChat === chat.roomID
                           ? 'bg-stone-100'
                           : ''
                       }`}
