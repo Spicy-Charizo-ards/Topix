@@ -56,10 +56,7 @@ const ChatWindow = ({
       {/* Chat Header */}
       <div className="flex items-center justify-between p-4 border-b bg-orange-950 rounded-t-lg">
         <div className="flex items-center">
-          <Avatar className="mr-3" />
-          <div>
             <h3 className="font-medium">{roomName}</h3>
-          </div>
         </div>
       </div>
 
@@ -92,11 +89,6 @@ const ChatWindow = ({
                       : 'bg-gray-100 text-gray-900'
                   }`}
                 >
-                  {!message.isOwn && (
-                    <p className="text-xs text-gray-500 mb-1">
-                      {message.sender}
-                    </p>
-                  )}
                   <p className="text-sm">{message.text}</p>
                   <p
                     className={`text-xs mt-1 ${
