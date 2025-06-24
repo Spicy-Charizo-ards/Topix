@@ -13,21 +13,22 @@ interface chatClient {
 }
 
 interface Message {
-  mID: string;
+  mID: string | number;
   text: string;
-  sender: string;
+  sender: string | number;
   timestamp: Date;
+  imgURL?: string | null;
   isOwn: boolean;
 }
 
 interface ChatRoom {
-  roomID: string;
+  roomID: string | number;
   name: string;
   messages: Message[];
 }
 
 interface User {
-  userID: string;
+  userID: string | number;
   userName: string;
 }
 
@@ -37,19 +38,20 @@ const Dashboard = () => {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   //*Creating fake user to connect to socket
   const [currentUser, setCurrentUser] = useState<User>({
-    userID: '123',
+    userID: 123,
     userName: 'Wenjun'
   });
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
-      roomID: '1',
+      roomID: 1,
       name: 'Charizard',
       messages: [
         {
-          mID: '1',
+          mID: 1,
           text: 'Hey everyone! I will not be here today.',
           sender: 'Wenjun',
           timestamp: new Date(Date.now() - 300000),
+          imgURL: null,
           isOwn: false,
         },
       ],

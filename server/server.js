@@ -85,17 +85,18 @@ wsServer.on('connection', (ws) => {
                 break;
             case 'SEND_CHAT':
                 //add chat to db and broadcast to members of that chat
-                await createMessage(userId, roomId, content, imgUrl)
+                // await createMessage(userId, roomId, content, imgUrl)
+                await createMessage(payload.user, payload.roomId, payload.message)
                 //get all users with the broadcasting room as their 'active room'
                 //probably what that string looks like
-                `SELECT DISTINCT id
-                FROM User
-                WHERE activeRoomId = ${roomId};
-                `
+                // `SELECT DISTINCT id
+                // FROM User
+                // WHERE activeRoomId = ${roomId};
+                // `
                 //store those user ids in an array or obj called 'usersToBroadcast'
-                const usersToBroadcast = []
+                // const usersToBroadcast = []
 
-                broadcastMsg(payload.message)
+                // broadcastMsg(payload.message)
                 break;
             default:
                 break;

@@ -8,6 +8,7 @@ interface Payload {
     message?: string;
     user?: string;
     timestamp?: Date;
+    imgURL: string | null;
     roomName?: string;
 }
 
@@ -27,6 +28,7 @@ interface Message {
     text: string;
     sender: string;
     timestamp: Date;
+    imgURL: string | null;
     isOwn: boolean;
   }
   
@@ -61,7 +63,7 @@ interface Message {
 
         sendChatToServer(msg: Message, room: ChatRoom){
             //destructure msg so parts can be sent to the server.
-            const { mID, text, sender, timestamp } = msg;
+            const { mID, text, sender, timestamp, imgURL } = msg;
             const { roomID } = room;
         
             //* this kind of uses redux action formatting, the server will kind of resemble a redux reducer.
@@ -74,6 +76,7 @@ interface Message {
                     message: text,
                     user: sender,
                     timestamp: timestamp,
+                    imgURL:imgURL,
                     roomName: roomID
                 }
             }
