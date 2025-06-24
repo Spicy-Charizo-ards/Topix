@@ -21,6 +21,7 @@ model User {
   email     String   @unique
   username  String
   password  String
+  isActive  Boolean  @default(false)
 
   // ! assuming user can only be in one active chat room
   activeRoomId Int?
@@ -57,7 +58,7 @@ model Room {
   isActive       Boolean      @default(true)
   activeUsers    User[]       @relation("ActiveUsers")
   // privacy settings 
-  private        Boolean      @default(false)
+  isPrivate        Boolean      @default(false)
   passwordPrompt String?
   password       String?
   description    String?
