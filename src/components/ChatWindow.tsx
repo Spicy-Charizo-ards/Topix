@@ -11,15 +11,23 @@ interface Message {
   isOwn: boolean;
 }
 
+//user for websocket connection
+interface User {
+  userID: string;
+  userName: string;
+}
+
 interface ChatWindowProps {
   roomName?: string;
   messages?: Message[];
+  user: User;
   onSendMessage?: (message: string) => void;
 }
 
 const ChatWindow = ({
   roomName = 'General Chat',
   messages = [],
+  user,
   onSendMessage,
 }: ChatWindowProps) => {
   const [inputMessage, setInputMessage] = useState('');
@@ -35,7 +43,7 @@ const ChatWindow = ({
 
   //* CONNECT CLIENT TO SOCKET
   useEffect(() => {
-    wsClient();
+    wsClient(user);
   }, []);
 
   const handleSendMessage = () => {

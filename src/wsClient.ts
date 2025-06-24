@@ -6,9 +6,14 @@
 interface Payload {
     msgID?: string;
     message?: string;
-    user?: string;
+    user?: string[];
     timestamp?: Date;
     roomName?: string;
+}
+
+interface User {
+    userID: string;
+    userName: string;
 }
 
 interface MessageData {
@@ -31,22 +36,29 @@ interface Message {
     messages: Message[];
   }
 
-// needs a url, in this case its the local host at 3000 because thats where the backend ws server is listening to.
-//! we may have to change this later if we get the app hosted on an aws server.
-const wsConnection = new WebSocket('ws://localhost:3000');
-
-//handles websocket connection logic "what is the client sending to the server and how will it handle what it gets back"
-function wsClient(){
+  
+  //handles websocket connection logic "what is the client sending to the server and how will it handle what it gets back"
+  function wsClient(userArg: User){
+    // needs a url, in this case its the local host at 3000 because thats where the backend ws server is listening to.
+    //! we may have to change this later if we get the app hosted on an aws server.
+    const wsConnection = new WebSocket('ws://localhost:3000');
 
     //* Websocket commands are methods that you have to define with logic. onopen, onmessage, onclose are a few of the important ones
     //when the connection first opens...
+    
 
+    //*user passed into data to be sent as a message to server
+    const { userID, userName } = userArg;
+    
     //? more info on how this function is structured below at the sendMsgToServer function...
     wsConnection.onopen = () => {
-
         //tell server that a new user has connected
         const data = {
-            type: 'NEW_USER'
+            type: 'JOIN_USER',
+            payload: {
+                userID: userID,
+                userName: userName
+            }
         }
 
         //send the data to server

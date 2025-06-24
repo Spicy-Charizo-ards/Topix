@@ -5,9 +5,9 @@ import { wsClient } from './wsClient';
 
 function App() {
   //* this use effect is just to demo the wsClient module. It can be removed and migrated over to individual chat components
-  useEffect(()=>{
-    wsClient();
-  }, [])
+  // useEffect(()=>{
+  //   wsClient();
+  // }, [])
 
   return (
     <div>

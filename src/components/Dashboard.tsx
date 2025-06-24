@@ -20,10 +20,19 @@ interface ChatRoom {
   messages: Message[];
 }
 
+interface User {
+  userID: string;
+  userName: string;
+}
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
-
+  //*Creating fake user to connect to socket
+  const [currentUser, setCurrentUser] = useState<User>({
+    userID: '123',
+    userName: 'Wenjun'
+  });
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
       roomID: '1',
@@ -128,6 +137,7 @@ const Dashboard = () => {
                     roomName={selectedChatRoom?.name || ''}
                     messages={selectedChatRoom?.messages || []}
                     onSendMessage={handleSendMessage}
+                    user={currentUser}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">

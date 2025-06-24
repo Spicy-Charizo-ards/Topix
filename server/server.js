@@ -53,7 +53,7 @@ const wsServer = new WebSocketServer({ server: server });
 wsServer.on('connection', (ws) => {
 
     //TODO: assign the current ws socket an id. probably from the DB to identify connections. The clients might send this information after authenticating
-    // i.e: wd.id = some data pulled from the 'NEW_USER' message from client
+    // i.e: ws.id = some data pulled from the 'NEW_USER' message from client
 
     //**TODO: put the user in a chatroom. The client sends messages with target chatroom in them to server
     //TODO: the chatroom is a map or a set that holds all users inside
@@ -65,19 +65,20 @@ wsServer.on('connection', (ws) => {
     ws.on('error', console.error);
 
     //after receiving a message from client route it back to everyone exept the sender
-    ws.on('message', async function incoming(data){
+    ws.on('message', async function incoming(message){
         //for each client connected to the server socket, broadcast the recieved message to them all
-        broadcastMsg(data, ws)
-
+        // broadcastMsg(data, ws)
+        const { type, payload } = JSON.parse(message)
         //TODO: BIG switch statement here that controls what happens with user messages. all the db queries for user and room info go here too.
         //some of these might end up being routes instead.
         switch(type){
             case 'NEW_USER':
-              await createUser(name, email, username, password)
-                 break;
+                //   await createUser(name, email, username, password)
+                break;
             case 'JOIN_USER':
-                //add user to a chat in db
-                //assign some sort of id to the client socket
+                    console.log('info from payload: userID:',payload.userID);
+                    //add user to a chat in db
+                    //assign some sort of id to the client socket
                 break;
             case 'SEND_CHAT':
                 //add chat to db and broadcast to members of that chat
@@ -101,7 +102,7 @@ wsServer.on('connection', (ws) => {
 function broadcastMsg(data, ignoredSocket){
     wsServer.clients.forEach((client)=>{
         //as long as the socket is connected (its readyState is OPEN) AND it is not the socket that sent the message (ignoredSocket), send the message back to the other clients
-        if(ws.readyState === WebSocket.OPEN && client !== ignoredSocket){
+        if(client.readyState === WebSocket.OPEN && client !== ignoredSocket){
             client.send(data);
         }
     })     
