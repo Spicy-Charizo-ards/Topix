@@ -101,9 +101,14 @@ function broadcastMsg(data, ignoredSocket){
 
 }
 
+app.use('/test', (req, res) => {
+  console.log('test end point working ')
+  return res.send("test endpoint working")
+})
 
 //! add catch all error handler for incorrect routes
 app.use((req, res) => res.status(404).send('This is not the page you\re looking for.'))
+
 
 //global error handler
 app.use((err, req, res, next) => {
