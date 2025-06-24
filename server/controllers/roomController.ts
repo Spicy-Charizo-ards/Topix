@@ -73,7 +73,7 @@ export const createRoom = async (
         creatorId: userId,
         name: roomName,
         description: roomDescription,
-        private: false,
+        isPrivate: false,
       },
       select: {
         id: true,
