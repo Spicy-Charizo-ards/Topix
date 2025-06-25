@@ -2,38 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
 import { wsClient } from '../wsClient';
-import type { IncomingMessage } from 'http';
+import type {Message, ChatRoom, chatClient, User} from '../types';
+// import type { IncomingMessage } from 'http';
 
-interface Message {
-  mID?: string | number;
-    text: string;
-    sender: string | number;
-    timestamp: Date;
-    imgURL?: string | null;
-    isOwn?: boolean;
-}
 
-interface ChatRoom {
-  roomID: string | number;
-  name: string;
-  messages: Message[];
-}
-
-//user for websocket connection
-interface User {
-  userID: string | number;
-  userName: string;
-}
-
-//* Websocket wrapper
-interface chatClient {
-  socket: WebSocket;
-  ononMessageReceived?: (message: Message) => void;
-  sendChatToServer: (message: Message, room: ChatRoom)=> void;
-}
-
-//TODO: make it so that the users are the same. currently, on connection it is getting user from chatwindow.
-//TODO: on send the user is coming from dashboard
 interface ChatWindowProps {
   roomName?: string;
   messages?: Message[];
@@ -50,11 +22,14 @@ const ChatWindow = ({
   messages = [],
   currentUser,
   chatrooms,
-  //pass chat client up
   chatClientWS,
   currentMessage,
   onSendMessage,
 }: ChatWindowProps) => {
+  const [inputMessage, setInputMessage] = useState('');
+  const [chatroomID, setChatroomID] = useState<string | number>(1);
+  const [chatUser, setChatUser] = useState<User>({userID: Math.random(), userName: 'Mj'});
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentChat, setCurrentChat] = useState<ChatRoom[]>([
     {
       roomID: 1,
@@ -71,10 +46,6 @@ const ChatWindow = ({
       ],
     },
   ]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [chatroomID, setChatroomID] = useState<string | number>(1);
-  const [chatUser, setChatUser] = useState<User>({userID: Math.random(), userName: 'Mj'});
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

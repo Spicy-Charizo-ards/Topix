@@ -2,49 +2,20 @@ import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
-import { wsClient } from '../wsClient';
+import type {Message, ChatRoom, chatClient, User} from '../types';
 
 type TabType = 'private' | 'public' | 'invites';
 
 //TODO: get chat messages from db, then put them in an array with map
 //TODO: pass to chatwindow.tsx
 
-//* Websocket wrapper
-interface chatClient {
-  socket: WebSocket;
-  sendChatToServer: (message: Message, room: ChatRoom) => void;
-}
-
-interface Message {
-  mID?: string | number;
-  text: string;
-  sender: string | number;
-  timestamp: Date;
-  imgURL?: string | null;
-  isOwn?: boolean;
-}
-
-interface ChatRoom {
-  roomID: string | number;
-  name: string;
-  messages: Message[];
-}
-
-interface User {
-  userID: string | number;
-  userName: string;
-}
-
+//* A few states are getting pulled up from chatwindow like the current user and the websocket client
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
   const [chatClientWS, setChatClientWS] = useState<chatClient>();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [currentMessage, setcurrentMessage] = useState<string>('');
-  //*Creating fake user to connect to socket
-  const [currentUser, setCurrentUser] = useState<User>({
-    userID: Math.random(),
-    userName: 'Wenjun',
-  });
+  const [currentUser, setCurrentUser] = useState<User>();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
       roomID: 1,
@@ -65,12 +36,6 @@ const Dashboard = () => {
   const selectedChatRoom = chatRooms.find(
     (chat) => chat.roomID === selectedChat
   );
-
-  //placing this here
-  useEffect(() => {
-    // const chatWS = wsClient(currentUser);
-    // setChatClientWS(chatWS);
-  }, [currentUser, selectedChat]);
 
   // useEffect(() => {
   //   const chatWS = wsClient(currentUser, (incomingMessage: Message) => {

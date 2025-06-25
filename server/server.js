@@ -17,11 +17,6 @@ import {createRoom} from "./controllers/roomController.ts"
 import {createMessage} from "./controllers/messageController.ts"
 import { enterRoom } from './controllers/userController.ts';
 
-//TODO these need to be changed to es import format.
-// const cookieParser = require('cookie-parser');
-
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
