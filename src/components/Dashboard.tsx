@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
-import { wsClient } from '../wsClient';
+// import { wsClient } from '../wsClient';
 
 type TabType = 'private' | 'public' | 'invites';
 
@@ -64,13 +64,6 @@ const Dashboard = () => {
 
   const selectedChatRoom = chatRooms.find((chat) => chat.roomID === selectedChat);
 
-  //placing this here
-  useEffect(()=>{
-    const chatWS = wsClient(currentUser);
-    setChatClientWS(chatWS);
-  },[]);
-
-
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
 
@@ -103,30 +96,30 @@ const Dashboard = () => {
   //   )
   // );
 
-  // async function getMessagesFromDB(){
-  //   console.log('loading messages');
-  //   const url = 'http://localhost:3000/getMessages';
+  async function getMessagesFromDB(){
+    console.log('loading messages');
+    const url = 'http://localhost:3000/getMessages';
 
-  //   try{
-  //     const response = await fetch(url);
-  //     if(!response.ok){
-  //       throw new Error(`Response status: ${response.status}`);
-  //     }
-  //     const json = await response.json();
-  //     console.log('res:',json);
+    try{
+      const response = await fetch(url);
+      if(!response.ok){
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const json = await response.json();
+      console.log('res:',json);
     
-  //     //run map
-  //     // setChatRooms(chatRooms)
+      //run map
+      // setChatRooms(chatRooms)
       
-  //   }catch(err){
-  //     console.log(err.message);
-  //   }
-  // }
+    }catch(err){
+      console.log(err.message);
+    }
+  }
 
   useEffect(()=>{
     // some function to request messages on load
-    // getMessagesFromDB();
-  }, [])
+    getMessagesFromDB();
+  }, []);
 
   return (
     <div className="w-full min-h-screen">
@@ -191,6 +184,7 @@ const Dashboard = () => {
                     messages={selectedChatRoom?.messages || []}
                     onSendMessage={handleSendMessage}
                     currentMessage={setcurrentMessage}
+                    chatClientWS={setChatClientWS}
                     user={currentUser}
                   />
                 ) : (

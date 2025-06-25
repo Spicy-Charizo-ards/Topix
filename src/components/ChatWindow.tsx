@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
-// import { wsClient } from '../wsClient';
+import { wsClient } from '../wsClient';
 
 interface Message {
   mID?: string;
@@ -13,8 +13,14 @@ interface Message {
 
 //user for websocket connection
 interface User {
-  userID: string;
+  userID: string | number;
   userName: string;
+}
+
+//* Websocket wrapper
+interface chatClient {
+  socket: WebSocket;
+  sendChatToServer: (message: Message, room: ChatRoom)=> void;
 }
 
 interface ChatWindowProps {
@@ -22,16 +28,21 @@ interface ChatWindowProps {
   messages?: Message[];
   user: User;
   currentMessage: (msg:string) => void;
+  chatClientWS: (cc:chatClient) => chatClient;
   onSendMessage?: (message: string) => void;
 }
 
 const ChatWindow = ({
+  user,
   roomName = 'General Chat',
   messages = [],
+  //pass chat client up
+  chatClientWS,
   currentMessage,
   onSendMessage,
 }: ChatWindowProps) => {
   const [inputMessage, setInputMessage] = useState('');
+  const [chatUser, setChatUser] = useState<User>({userID: Math.random(), userName: 'Mj'});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -60,6 +71,11 @@ const ChatWindow = ({
   useEffect(()=>{
     currentMessage(inputMessage);
   }, [currentMessage, inputMessage]);
+  
+  //!mount chat client here. Its passing up to the state in dashboard
+  useEffect(()=>{
+    chatClientWS(wsClient(chatUser));
+  }, []);
 
 
   return (
