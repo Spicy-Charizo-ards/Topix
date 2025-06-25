@@ -4,7 +4,7 @@ import { Send } from '@mui/icons-material';
 // import { wsClient } from '../wsClient';
 
 interface Message {
-  mID: string;
+  mID?: string;
   text: string;
   sender: string;
   timestamp: Date;
@@ -21,12 +21,14 @@ interface ChatWindowProps {
   roomName?: string;
   messages?: Message[];
   user: User;
+  currentMessage: (msg:string) => void;
   onSendMessage?: (message: string) => void;
 }
 
 const ChatWindow = ({
   roomName = 'General Chat',
   messages = [],
+  currentMessage,
   onSendMessage,
 }: ChatWindowProps) => {
   const [inputMessage, setInputMessage] = useState('');
@@ -54,6 +56,12 @@ const ChatWindow = ({
     }
   };
 
+  //* To set the message from dashboard with input message
+  useEffect(()=>{
+    currentMessage(inputMessage);
+  }, [currentMessage, inputMessage]);
+
+
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
       {/* Chat Header */}
@@ -72,6 +80,7 @@ const ChatWindow = ({
         ) : (
           messages.map((message) => (
             <div
+            //TODO: destructure the array of messages from Dashboard here...
               key={message.mID}
               className={`flex ${
                 message.isOwn ? 'justify-end' : 'justify-start'

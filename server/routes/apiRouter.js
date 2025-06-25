@@ -1,10 +1,12 @@
-const express = require('express');
-
+import express from 'express';
+import { getRoomMesages } from '../controllers/messageController.ts';
 
 const apiRouter = express.Router();
 
 // get request that (endpoint, controller)
-apiRouter.get();
+apiRouter.get('/getMessages', getRoomMesages, (req,res) => {
+    return res.status(200).json(res.locals.messages);
+});
 
 
-// module.exports = apiRouter;
+export default apiRouter;

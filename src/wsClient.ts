@@ -128,6 +128,7 @@ interface Message {
             case 'NEW_MESSAGE':
                 //* logging to browser console but this is a message from another user that got broadcast to the chat room from server.
                 console.log(payload.message)
+                const msgFromServer = payload;
                 break;
             default:
                 break;

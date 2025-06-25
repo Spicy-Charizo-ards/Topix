@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // api router v
-// import apiRouter from './routes/apiRouter';
+import apiRouter from './routes/apiRouter.js';
 import cookieParser from 'cookie-parser';
 import { WebSocket, WebSocketServer } from 'ws';
 
@@ -37,6 +37,9 @@ app.use(express.json());
 
 //serve index through main folder
 app.use(express.static(path.resolve(__dirname, '../src')));
+
+//* Get messages from db route
+app.use('/', apiRouter);
 
 //link router
 //app.use()
@@ -84,9 +87,10 @@ wsServer.on('connection', (ws) => {
                     enterRoom()
                 break;
             case 'SEND_CHAT':
+                console.log(payload);
                 //add chat to db and broadcast to members of that chat
                 // await createMessage(userId, roomId, content, imgUrl)
-                await createMessage(payload.user, payload.roomId, payload.message)
+                await createMessage(payload.user, payload.roomName, payload.message)
                 //get all users with the broadcasting room as their 'active room'
                 //probably what that string looks like
                 // `SELECT DISTINCT id
@@ -96,7 +100,14 @@ wsServer.on('connection', (ws) => {
                 //store those user ids in an array or obj called 'usersToBroadcast'
                 // const usersToBroadcast = []
 
-                // broadcastMsg(payload.message)
+                const msgToUser = {
+                  type: 'NEW_MESSAGE',
+                  payload: {
+                    message: payload.message
+                  }
+                }
+
+                broadcastMsg(JSON.stringify(msgToUser))
                 break;
             default:
                 break;
@@ -114,10 +125,10 @@ function broadcastMsg(messageToSend, ignoredSocket){
         //as long as the socket is connected (its readyState is OPEN) AND it is not the socket that sent the message (ignoredSocket), send the message back to the other clients
         if(client.readyState === WebSocket.OPEN && client !== ignoredSocket){
             //check to see if the current client is included in the broadcast list
-            if(usersToBroadcast.includes(client)){
+            // if(usersToBroadcast.includes(client)){
                 //send the message
                 client.send(messageToSend);
-            }
+            // }
         }
     })     
 
@@ -142,6 +153,8 @@ app.use('/test', async (req, res) => {
     content: "Can I offer you an egg in this trying time?",
     roomId: 1,
 }
+
+
 
   // const createdUser = await createUser(mockUser.name, mockUser.email, mockUser.username, mockUser.password)
   // console.log({createdUser})
