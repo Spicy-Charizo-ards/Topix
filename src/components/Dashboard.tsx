@@ -1,66 +1,132 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
+import { wsClient } from '../wsClient';
 
 type TabType = 'private' | 'public' | 'invites';
 
+//TODO: get chat messages from db, then put them in an array with map
+//TODO: pass to chatwindow.tsx
+
+//* Websocket wrapper
+interface chatClient {
+  socket: WebSocket;
+  sendChatToServer: (message: Message, room: ChatRoom)=> void;
+}
+
 interface Message {
-  id: string;
+  mID?: string | number;
   text: string;
-  sender: string;
+  sender: string | number;
   timestamp: Date;
-  isOwn: boolean;
+  imgURL?: string | null;
+  isOwn?: boolean;
 }
 
 interface ChatRoom {
-  id: string;
+  roomID: string | number;
   name: string;
   messages: Message[];
 }
 
+interface User {
+  userID: string | number;
+  userName: string;
+}
+
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
+  const [chatClientWS, setChatClientWS] = useState<chatClient>();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
-
+  const [currentMessage, setcurrentMessage] = useState<string>('');
+  //*Creating fake user to connect to socket
+  const [currentUser, setCurrentUser] = useState<User>({
+    userID: Math.random(),
+    userName: 'Wenjun'
+  });
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
-      id: '1',
+      roomID: 1,
       name: 'Charizard',
       messages: [
         {
-          id: '1',
-          text: 'Hey everyone! I will not be here today.',
-          sender: 'Wenjun',
+          // mID: 4,
+          text: currentMessage,
+          sender: 1,
           timestamp: new Date(Date.now() - 300000),
+          imgURL: null,
           isOwn: false,
         },
       ],
     },
   ]);
 
-  const selectedChatRoom = chatRooms.find((chat) => chat.id === selectedChat);
+  const selectedChatRoom = chatRooms.find((chat) => chat.roomID === selectedChat);
+
+  //placing this here
+  useEffect(()=>{
+    const chatWS = wsClient(currentUser);
+    setChatClientWS(chatWS);
+  },[]);
+
 
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
 
+    //* index of sent message SHOULD be what is on the end of the array for chatRooms
     const newMessage: Message = {
-      id: Date.now().toString(),
-      text: messageText,
-      sender: 'You',
+      //date time to make mid's unique
+      mID: Date.now().toString(),
+      text: currentMessage,
+      sender: chatRooms[chatRooms.length-1].messages[chatRooms.length-1].sender,
       timestamp: new Date(),
       isOwn: true,
+      imgURL: null
     };
 
+    //* SENDING MESSAGE TO SERVER USING SEND MESSAGE HANDLER
+    chatClientWS.sendChatToServer(newMessage, chatRooms[chatRooms.length-1]);
+
     // Update the selected chat room's messages
-    setChatRooms((prev) =>
-      prev.map((chat) =>
-        chat.id === selectedChat
-          ? { ...chat, messages: [...chat.messages, newMessage] }
-          : chat
-      )
+    renderMessages((msgs) =>{
+      return(<></>)
+    }
     );
   };
+  //*This is for chatrooms
+  // setChatRooms((prev) =>
+  //   prev.map((chat) =>
+  //     chat.roomID === selectedChat
+  //       ? { ...chat, mID: [...chat.messages, newMessage] }
+  //       : chat
+  //   )
+  // );
+
+  // async function getMessagesFromDB(){
+  //   console.log('loading messages');
+  //   const url = 'http://localhost:3000/getMessages';
+
+  //   try{
+  //     const response = await fetch(url);
+  //     if(!response.ok){
+  //       throw new Error(`Response status: ${response.status}`);
+  //     }
+  //     const json = await response.json();
+  //     console.log('res:',json);
+    
+  //     //run map
+  //     // setChatRooms(chatRooms)
+      
+  //   }catch(err){
+  //     console.log(err.message);
+  //   }
+  // }
+
+  useEffect(()=>{
+    // some function to request messages on load
+    // getMessagesFromDB();
+  }, [])
 
   return (
     <div className="w-full min-h-screen">
@@ -99,10 +165,10 @@ const Dashboard = () => {
                 <div className="space-y-2">
                   {chatRooms.map((chat) => (
                     <div
-                      key={chat.id}
-                      onClick={() => setSelectedChat(chat.id)}
+                      key={chat.roomID}
+                      onClick={() => setSelectedChat(chat.roomID)}
                       className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                        selectedChat === chat.id
+                        selectedChat === chat.roomID
                           ? 'bg-stone-100'
                           : ''
                       }`}
@@ -124,6 +190,8 @@ const Dashboard = () => {
                     roomName={selectedChatRoom?.name || ''}
                     messages={selectedChatRoom?.messages || []}
                     onSendMessage={handleSendMessage}
+                    currentMessage={setcurrentMessage}
+                    user={currentUser}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">

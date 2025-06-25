@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // api router v
-// import apiRouter from './routes/apiRouter';
+import apiRouter from './routes/apiRouter.js';
 import cookieParser from 'cookie-parser';
 import { WebSocket, WebSocketServer } from 'ws';
 
@@ -15,6 +15,7 @@ import http from 'http';
 import {createUser} from "./controllers/authController.ts"
 import {createRoom} from "./controllers/roomController.ts"
 import {createMessage} from "./controllers/messageController.ts"
+import { enterRoom } from './controllers/userController.ts';
 
 //TODO these need to be changed to es import format.
 // const cookieParser = require('cookie-parser');
@@ -37,6 +38,9 @@ app.use(express.json());
 //serve index through main folder
 app.use(express.static(path.resolve(__dirname, '../src')));
 
+//* Get messages from db route
+app.use('/', apiRouter);
+
 //link router
 //app.use()
 
@@ -53,7 +57,7 @@ const wsServer = new WebSocketServer({ server: server });
 wsServer.on('connection', (ws) => {
 
     //TODO: assign the current ws socket an id. probably from the DB to identify connections. The clients might send this information after authenticating
-    // i.e: wd.id = some data pulled from the 'NEW_USER' message from client
+    // i.e: ws.id = some data pulled from the 'NEW_USER' message from client
 
     //**TODO: put the user in a chatroom. The client sends messages with target chatroom in them to server
     //TODO: the chatroom is a map or a set that holds all users inside
@@ -65,26 +69,45 @@ wsServer.on('connection', (ws) => {
     ws.on('error', console.error);
 
     //after receiving a message from client route it back to everyone exept the sender
-    ws.on('message', async function incoming(data){
+    ws.on('message', async function incoming(message){
         //for each client connected to the server socket, broadcast the recieved message to them all
-        broadcastMsg(data, ws)
-
+        // broadcastMsg(data, ws)
+        const { type, payload } = JSON.parse(message)
         //TODO: BIG switch statement here that controls what happens with user messages. all the db queries for user and room info go here too.
         //some of these might end up being routes instead.
+        //! Routes instead list: 
+        //!: create a new user in db (registered user)
         switch(type){
-            case 'NEW_USER':
-              await createUser(name, email, username, password)
-                 break;
             case 'JOIN_USER':
-                //add user to a chat in db
+                    console.log('info from payload: userID:',payload.userID);
+                    //assign some sort of id to the client socket
+                    ws.id = payload.userID
+                    //add ws connection to the appropriate room
+                    //put user in room on DB
+                    enterRoom()
                 break;
             case 'SEND_CHAT':
+                console.log(payload);
                 //add chat to db and broadcast to members of that chat
-                await createMessage(userId, roomId, content, imgUrl)
-                break;
-            case 'CREATE_ROOM':
-                //add room to DB
-                await createRoom(userId, roomName, roomDescription)
+                // await createMessage(userId, roomId, content, imgUrl)
+                await createMessage(payload.user, payload.roomName, payload.message)
+                //get all users with the broadcasting room as their 'active room'
+                //probably what that string looks like
+                // `SELECT DISTINCT id
+                // FROM User
+                // WHERE activeRoomId = ${roomId};
+                // `
+                //store those user ids in an array or obj called 'usersToBroadcast'
+                // const usersToBroadcast = []
+
+                const msgToUser = {
+                  type: 'NEW_MESSAGE',
+                  payload: {
+                    message: payload.message
+                  }
+                }
+
+                broadcastMsg(JSON.stringify(msgToUser))
                 break;
             default:
                 break;
@@ -97,11 +120,15 @@ wsServer.on('connection', (ws) => {
 
 //*This just broadcasts to each user barring a specified socket which is supposed to be the user who sent the message in the first place.
 //may need to be changed at some point.
-function broadcastMsg(data, ignoredSocket){
+function broadcastMsg(messageToSend, ignoredSocket){
     wsServer.clients.forEach((client)=>{
         //as long as the socket is connected (its readyState is OPEN) AND it is not the socket that sent the message (ignoredSocket), send the message back to the other clients
-        if(ws.readyState === WebSocket.OPEN && client !== ignoredSocket){
-            client.send(data);
+        if(client.readyState === WebSocket.OPEN && client !== ignoredSocket){
+            //check to see if the current client is included in the broadcast list
+            // if(usersToBroadcast.includes(client)){
+                //send the message
+                client.send(messageToSend);
+            // }
         }
     })     
 
@@ -127,6 +154,8 @@ app.use('/test', async (req, res) => {
     roomId: 1,
 }
 
+
+
   // const createdUser = await createUser(mockUser.name, mockUser.email, mockUser.username, mockUser.password)
   // console.log({createdUser})
   // return res.send({data: createdUser})
@@ -142,6 +171,7 @@ app.use('/test', async (req, res) => {
 
 //! add catch all error handler for incorrect routes
 app.use((req, res) => res.status(404).send('This is not the page you\re looking for.'))
+
 
 
 //global error handler
