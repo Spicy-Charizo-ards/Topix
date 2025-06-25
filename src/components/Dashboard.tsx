@@ -12,7 +12,7 @@ type TabType = 'private' | 'public' | 'invites';
 //* Websocket wrapper
 interface chatClient {
   socket: WebSocket;
-  sendChatToServer: (message: Message, room: ChatRoom)=> void;
+  sendChatToServer: (message: Message, room: ChatRoom) => void;
 }
 
 interface Message {
@@ -43,7 +43,7 @@ const Dashboard = () => {
   //*Creating fake user to connect to socket
   const [currentUser, setCurrentUser] = useState<User>({
     userID: Math.random(),
-    userName: 'Wenjun'
+    userName: 'Wenjun',
   });
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
@@ -52,7 +52,7 @@ const Dashboard = () => {
       messages: [
         {
           // mID: 4,
-          text: currentMessage,
+          text: 'HEY',
           sender: 1,
           timestamp: new Date(Date.now() - 300000),
           imgURL: null,
@@ -62,14 +62,23 @@ const Dashboard = () => {
     },
   ]);
 
-  const selectedChatRoom = chatRooms.find((chat) => chat.roomID === selectedChat);
+  const selectedChatRoom = chatRooms.find(
+    (chat) => chat.roomID === selectedChat
+  );
 
   //placing this here
-  useEffect(()=>{
-    const chatWS = wsClient(currentUser);
+  useEffect(() => {
+    const chatWS = wsClient(currentUser, (incomingMessage: Message) => {
+      setChatRooms((prevRooms) =>
+        prevRooms.map((room) =>
+          room.roomID === selectedChat
+            ? { ...room, messages: [...room.messages, incomingMessage] }
+            : room
+        )
+      );
+    });
     setChatClientWS(chatWS);
-  },[]);
-
+  }, [currentUser, selectedChat]);
 
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
@@ -78,20 +87,23 @@ const Dashboard = () => {
     const newMessage: Message = {
       //date time to make mid's unique
       mID: Date.now().toString(),
-      text: currentMessage,
-      sender: chatRooms[chatRooms.length-1].messages[chatRooms.length-1].sender,
+      text: messageText,
+      sender: currentUser.userID,
       timestamp: new Date(),
       isOwn: true,
-      imgURL: null
+      imgURL: null,
     };
 
     //* SENDING MESSAGE TO SERVER USING SEND MESSAGE HANDLER
-    chatClientWS.sendChatToServer(newMessage, chatRooms[chatRooms.length-1]);
+    chatClientWS?.sendChatToServer(newMessage, selectedChatRoom);
 
-    // Update the selected chat room's messages
-    renderMessages((msgs) =>{
-      return(<></>)
-    }
+    // Update local state to show the new message immediately
+    setChatRooms((prevRooms) =>
+      prevRooms.map((room) =>
+        room.roomID === selectedChatRoom.roomID
+          ? { ...room, messages: [...room.messages, newMessage] }
+          : room
+      )
     );
   };
   //*This is for chatrooms
@@ -114,10 +126,8 @@ const Dashboard = () => {
   //     }
   //     const json = await response.json();
   //     console.log('res:',json);
-    
   //     //run map
   //     // setChatRooms(chatRooms)
-      
   //   }catch(err){
   //     console.log(err.message);
   //   }
@@ -168,16 +178,14 @@ const Dashboard = () => {
                       key={chat.roomID}
                       onClick={() => setSelectedChat(chat.roomID)}
                       className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                        selectedChat === chat.roomID
-                          ? 'bg-stone-100'
-                          : ''
+                        selectedChat === chat.roomID ? 'bg-stone-100' : ''
                       }`}
                     >
                       <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-neutral-500 truncate">
-                            {chat.name}
-                          </h3>
-                        </div>
+                        <h3 className="font-medium text-neutral-500 truncate">
+                          {chat.name}
+                        </h3>
+                      </div>
                     </div>
                   ))}
                 </div>
