@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
-// import { wsClient } from '../wsClient';
+import { wsClient } from '../wsClient';
 
 type TabType = 'private' | 'public' | 'invites';
 
@@ -68,17 +68,22 @@ const Dashboard = () => {
 
   //placing this here
   useEffect(() => {
-    const chatWS = wsClient(currentUser, (incomingMessage: Message) => {
-      setChatRooms((prevRooms) =>
-        prevRooms.map((room) =>
-          room.roomID === selectedChat
-            ? { ...room, messages: [...room.messages, incomingMessage] }
-            : room
-        )
-      );
-    });
-    setChatClientWS(chatWS);
+    // const chatWS = wsClient(currentUser);
+    // setChatClientWS(chatWS);
   }, [currentUser, selectedChat]);
+
+  // useEffect(() => {
+  //   const chatWS = wsClient(currentUser, (incomingMessage: Message) => {
+  //     setChatRooms((prevRooms) =>
+  //       prevRooms.map((room) =>
+  //         room.roomID === selectedChat
+  //           ? { ...room, messages: [...room.messages, incomingMessage] }
+  //           : room
+  //       )
+  //     );
+  //   });
+  //   setChatClientWS(chatWS);
+  // }, [currentUser, selectedChat]);
 
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
@@ -137,7 +142,7 @@ const Dashboard = () => {
 
   useEffect(()=>{
     // some function to request messages on load
-    getMessagesFromDB();
+    // getMessagesFromDB();
   }, []);
 
   return (
@@ -199,10 +204,12 @@ const Dashboard = () => {
                   <ChatWindow
                     roomName={selectedChatRoom?.name || ''}
                     messages={selectedChatRoom?.messages || []}
+                    chatrooms={setChatRooms}
+                    selectedChat={setSelectedChat}
                     onSendMessage={handleSendMessage}
                     currentMessage={setcurrentMessage}
                     chatClientWS={setChatClientWS}
-                    user={currentUser}
+                    currentUser={setCurrentUser}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">

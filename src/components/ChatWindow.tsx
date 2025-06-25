@@ -2,13 +2,21 @@ import { useState, useRef, useEffect } from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
 import { wsClient } from '../wsClient';
+import type { IncomingMessage } from 'http';
 
 interface Message {
-  mID?: string;
-  text: string;
-  sender: string;
-  timestamp: Date;
-  isOwn: boolean;
+  mID?: string | number;
+    text: string;
+    sender: string | number;
+    timestamp: Date;
+    imgURL?: string | null;
+    isOwn?: boolean;
+}
+
+interface ChatRoom {
+  roomID: string | number;
+  name: string;
+  messages: Message[];
 }
 
 //user for websocket connection
@@ -20,28 +28,51 @@ interface User {
 //* Websocket wrapper
 interface chatClient {
   socket: WebSocket;
+  ononMessageReceived?: (message: Message) => void;
   sendChatToServer: (message: Message, room: ChatRoom)=> void;
 }
 
+//TODO: make it so that the users are the same. currently, on connection it is getting user from chatwindow.
+//TODO: on send the user is coming from dashboard
 interface ChatWindowProps {
   roomName?: string;
   messages?: Message[];
-  user: User;
+  currentUser: (cu:User)=>void;
+  chatrooms: (incomingMessage: React.SetStateAction<ChatRoom[]>) => void;
+  selectedChat: (sc: string | null) => void;
   currentMessage: (msg:string) => void;
   chatClientWS: (cc:chatClient) => chatClient;
   onSendMessage?: (message: string) => void;
 }
 
 const ChatWindow = ({
-  user,
   roomName = 'General Chat',
   messages = [],
+  currentUser,
+  chatrooms,
   //pass chat client up
   chatClientWS,
   currentMessage,
   onSendMessage,
 }: ChatWindowProps) => {
+  const [currentChat, setCurrentChat] = useState<ChatRoom[]>([
+    {
+      roomID: 1,
+      name: 'Charizard',
+      messages: [
+        {
+          // mID: 4,
+          text: 'HEY',
+          sender: 1,
+          timestamp: new Date(Date.now() - 300000),
+          imgURL: null,
+          isOwn: false,
+        },
+      ],
+    },
+  ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [chatroomID, setChatroomID] = useState<string | number>(1);
   const [chatUser, setChatUser] = useState<User>({userID: Math.random(), userName: 'Mj'});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +105,16 @@ const ChatWindow = ({
   
   //!mount chat client here. Its passing up to the state in dashboard
   useEffect(()=>{
-    chatClientWS(wsClient(chatUser));
+    currentUser(chatUser);
+    chatClientWS(wsClient(chatUser, (incomingMessage: Message) => {
+      chatrooms((prevRooms) =>
+        prevRooms.map((room) =>
+          room.roomID === chatroomID
+            ? { ...room, messages: [...room.messages, incomingMessage] }
+            : room
+        )
+      );
+    }));
   }, []);
 
 
