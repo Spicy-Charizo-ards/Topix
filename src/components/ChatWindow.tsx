@@ -21,7 +21,7 @@ interface ChatWindowProps {
   roomName?: string;
   messages?: Message[];
   user: User;
-  currentMessage: (msg:string) => void;
+  currentMessage: (msg: string) => void;
   onSendMessage?: (message: string) => void;
 }
 
@@ -57,17 +57,16 @@ const ChatWindow = ({
   };
 
   //* To set the message from dashboard with input message
-  useEffect(()=>{
+  useEffect(() => {
     currentMessage(inputMessage);
   }, [currentMessage, inputMessage]);
-
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
       {/* Chat Header */}
       <div className="flex items-center justify-between p-4 border-b bg-orange-950 rounded-t-lg">
         <div className="flex items-center">
-            <h3 className="font-medium">{roomName}</h3>
+          <h3 className="font-medium">{roomName}</h3>
         </div>
       </div>
 
@@ -78,10 +77,10 @@ const ChatWindow = ({
             <p>No messages yet. Start the conversation!</p>
           </div>
         ) : (
-          messages.map((message) => (
+          messages.map((message, i) => (
             <div
-            //TODO: destructure the array of messages from Dashboard here...
-              key={message.mID}
+              //TODO: destructure the array of messages from Dashboard here...
+              key={message.mID || i}
               className={`flex ${
                 message.isOwn ? 'justify-end' : 'justify-start'
               }`}
