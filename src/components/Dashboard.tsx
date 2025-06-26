@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
-import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
-import type {Message, ChatRoom, chatClient, User} from '../types';
+import type { Message, ChatRoom, chatClient, AuthUser } from '../types';
 
 type TabType = 'private' | 'public' | 'invites';
+
+interface DashboardProps {
+  currentUser: AuthUser;
+  onLogout: () => void;
+}
 
 //TODO: get chat messages from db, then put them in an array with map
 //TODO: pass to chatwindow.tsx
 
 //* A few states are getting pulled up from chatwindow like the current user and the websocket client
-const Dashboard = () => {
+const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
   const [chatClientWS, setChatClientWS] = useState<chatClient>();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
-  const [currentMessage, setcurrentMessage] = useState<string>('');
-  const [currentUser, setCurrentUser] = useState<User>();
+  // const [currentMessage, setcurrentMessage] = useState<string>('');
+  // const [currentUser, setCurrentUser] = useState<User>();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
       roomID: 1,
@@ -58,7 +62,7 @@ const Dashboard = () => {
       //date time to make mid's unique
       mID: Date.now().toString(),
       text: messageText,
-      sender: currentUser.userID,
+      sender: currentUser.id,
       timestamp: new Date(),
       isOwn: true,
       imgURL: null,
@@ -85,51 +89,78 @@ const Dashboard = () => {
   //   )
   // );
 
-  async function getMessagesFromDB(){
-    console.log('loading messages');
-    const url = 'http://localhost:3000/getMessages';
-
-    try{
-      const response = await fetch(url);
-      if(!response.ok){
-        throw new Error(`Response status: ${response.status}`);
-      }
-      const json = await response.json();
-      console.log('res:',json);
-    
-      //run map
-      // setChatRooms(chatRooms)
-      
-    }catch(err){
-      console.log(err.message);
-    }
-  }
-
-  useEffect(()=>{
+  useEffect(() => {
     // some function to request messages on load
     // getMessagesFromDB();
   }, []);
 
   return (
     <div className="w-full min-h-screen">
-      <div className="w-full bg-orange-950">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-4">
-            <button onClick={() => setActiveTab('private')}>
+      <div className="w-full bg-orange-900">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex gap-6">
+            <button
+              onClick={() => setActiveTab('private')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                activeTab === 'private'
+                  ? 'bg-orange-800 text-white'
+                  : 'text-orange-100 hover:bg-orange-800/50'
+              }`}
+            >
               <Chat />
-              Private Chats
+              <span className="hidden sm:inline">Private Chats</span>
             </button>
-            <button onClick={() => setActiveTab('public')}>
+            <button
+              onClick={() => setActiveTab('public')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                activeTab === 'public'
+                  ? 'bg-orange-800 text-white'
+                  : 'text-orange-100 hover:bg-orange-800/50'
+              }`}
+            >
               <Public />
-              Public Chats
+              <span className="hidden sm:inline">Public Chats</span>
             </button>
-            <button onClick={() => setActiveTab('invites')}>
+            <button
+              onClick={() => setActiveTab('invites')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                activeTab === 'invites'
+                  ? 'bg-orange-800 text-white'
+                  : 'text-orange-100 hover:bg-orange-800/50'
+              }`}
+            >
               <Mail />
-              Invites
+              <span className="hidden sm:inline">Invites</span>
             </button>
           </div>
-          <div className="flex mr-7">
-            <Avatar alt="Profile" />
+          <div className="flex items-center gap-4">
+            <div className="text-white">
+              <span className="text-sm font-medium">
+                Welcome, {currentUser.name}
+              </span>
+            </div>
+            <div className="w-8 h-8 bg-orange-200 rounded-full flex items-center justify-center text-orange-800 font-semibold text-sm">
+              {currentUser.name.charAt(0).toUpperCase()}
+            </div>
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-2 px-4 py-2 text-white border border-orange-200 rounded-lg hover:bg-orange-800 transition-colors"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </div>
       </div>
@@ -148,9 +179,11 @@ const Dashboard = () => {
                   {chatRooms.map((chat) => (
                     <div
                       key={chat.roomID}
-                      onClick={() => setSelectedChat(chat.roomID)}
+                      onClick={() => setSelectedChat(chat.roomID.toString())}
                       className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                        selectedChat === chat.roomID ? 'bg-stone-100' : ''
+                        selectedChat === chat.roomID.toString()
+                          ? 'bg-stone-100'
+                          : ''
                       }`}
                     >
                       <div className="flex-1 min-w-0">
@@ -172,9 +205,12 @@ const Dashboard = () => {
                     chatrooms={setChatRooms}
                     selectedChat={setSelectedChat}
                     onSendMessage={handleSendMessage}
-                    currentMessage={setcurrentMessage}
-                    chatClientWS={setChatClientWS}
-                    currentUser={setCurrentUser}
+                    currentMessage={() => {}}
+                    chatClientWS={(client: chatClient) => {
+                      setChatClientWS(client);
+                      return client;
+                    }}
+                    currentUser={() => {}}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">
@@ -217,7 +253,9 @@ const Dashboard = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center">
-                  <Avatar className="mr-4" />
+                  <div className="w-8 h-8 bg-orange-200 rounded-full flex items-center justify-center text-orange-800 font-semibold text-sm mr-4">
+                    {currentUser.name.charAt(0).toUpperCase()}
+                  </div>
                   <div>
                     <h3 className="text-amber-900 font-medium">
                       AI Conventional Commits Dev Tool
