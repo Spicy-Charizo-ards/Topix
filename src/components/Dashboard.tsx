@@ -22,7 +22,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
   // const [currentUser, setCurrentUser] = useState<User>();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
-      roomID: 1,
+      roomID: '1',
       name: 'Charizard',
       messages: [
         {
@@ -98,10 +98,10 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
     <div className="min-h-screen flex items-center justify-center bg-clay-200 py-8 px-2 font-mono">
       <div className="w-full max-w-5xl mx-auto">
         {/* Window Frame */}
-        <div className="relative rounded-lg border-4 border-clay-700 shadow-[0_8px_32px_0_rgba(110,62,37,0.25)] bg-clay-50 overflow-hidden ring-2 ring-clay-100 ring-offset-2 ring-offset-clay-300">
+        <div className="relative rounded-lg border-2 border-clay-700 shadow-[0_8px_32px_0_rgba(110,62,37,0.25)] bg-clay-50 overflow-hidden">
           {/* Title Bar */}
           <div
-            className="flex items-center justify-between px-3 py-1 bg-clay-400 border-b-4 border-clay-700 select-none"
+            className="flex items-center justify-between px-3 py-1 bg-clay-400 border-clay-700 select-none"
             style={{
               fontFamily:
                 'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
@@ -113,16 +113,6 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
               <span className="w-3 h-3 rounded-full bg-red-300 border border-red-900 shadow-inner inline-block"></span>
               <span className="w-3 h-3 rounded-full bg-green-300 border border-green-900 shadow-inner inline-block"></span>
             </div>
-            <span
-              className="text-xs font-extrabold tracking-widest text-clay-900"
-              style={{
-                letterSpacing: '0.18em',
-                textShadow: '0 0 2px #fff, 0 0 1px #b98c6a',
-              }}
-            >
-              TOPIX DASHBOARD
-            </span>
-            <div className="w-8" /> {/* Spacer for symmetry */}
           </div>
 
           {/* Main Content */}
@@ -254,7 +244,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                           roomName={selectedChatRoom?.name || ''}
                           messages={selectedChatRoom?.messages || []}
                           chatrooms={setChatRooms}
-                          selectedChat={setSelectedChat}
+                          selectedChat={selectedChat}
                           onSendMessage={handleSendMessage}
                           currentMessage={() => {}}
                           chatClientWS={(client: chatClient) => {

@@ -10,7 +10,7 @@ interface ChatWindowProps {
   messages?: Message[];
   currentUser: (cu: User) => void;
   chatrooms: (incomingMessage: React.SetStateAction<ChatRoom[]>) => void;
-  selectedChat: (sc: string | null) => void;
+  selectedChat: string | number | null;
   currentMessage: (msg: string) => void;
   chatClientWS: (cc: chatClient) => chatClient;
   onSendMessage?: (message: string) => void;
@@ -24,9 +24,9 @@ const ChatWindow = ({
   chatClientWS,
   currentMessage,
   onSendMessage,
+  selectedChat,
 }: ChatWindowProps) => {
   const [inputMessage, setInputMessage] = useState('');
-  const [chatroomID, setChatroomID] = useState<string | number>(1);
   const [chatUser, setChatUser] = useState<User>({
     userID: Math.random(),
     userName: 'Mj',
@@ -83,7 +83,7 @@ const ChatWindow = ({
       wsClient(chatUser, (incomingMessage: Message) => {
         chatrooms((prevRooms) =>
           prevRooms.map((room) =>
-            room.roomID === chatroomID
+            room.roomID === selectedChat
               ? { ...room, messages: [...room.messages, incomingMessage] }
               : room
           )
@@ -96,23 +96,11 @@ const ChatWindow = ({
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
       {/* Chat Header */}
       <div
-        className="flex items-center justify-between px-4 py-2 bg-clay-200 border-b-2 border-clay-400 rounded-t-lg select-none"
         style={{
           fontFamily:
             'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
         }}
       >
-        <div className="flex items-center gap-2">
-          Charizard
-        </div>
-        <h3
-          className="text-base font-bold tracking-widest text-clay-800 uppercase"
-          style={{ letterSpacing: '0.15em' }}
-        >
-          {' '}
-          {roomName}{' '}
-        </h3>
-        <div className="w-8" /> {/* Spacer for symmetry */}
       </div>
 
       {/* Messages Area */}

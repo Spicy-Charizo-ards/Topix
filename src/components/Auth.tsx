@@ -77,45 +77,34 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
       <div className="max-w-md w-full">
         {/* Window Frame */}
         <div
-          className="relative rounded-lg border-4 border-clay-700 shadow-[0_8px_32px_0_rgba(110,62,37,0.25)] bg-clay-50 overflow-hidden ring-2 ring-clay-100 ring-offset-2 ring-offset-clay-300"
+          className="relative rounded-lg border-2 border-clay-700 shadow-[0_8px_32px_0_rgba(110,62,37,0.25)] bg-clay-50 overflow-hidden ring-2 ring-clay-100 ring-offset-2 ring-offset-clay-300"
           style={{ boxShadow: '0 8px 32px 0 #6e3e25, 0 1.5px 0 0 #b98c6a' }}
         >
           {/* Title Bar */}
           <div
-            className="flex items-center justify-between px-3 py-1 bg-clay-400 border-b-4 border-clay-700 select-none"
+            className="flex items-center justify-between px-3 py-1 bg-clay-400 border-clay-700"
             style={{
               fontFamily:
                 'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
             }}
           >
             <div className="flex items-center gap-2">
-              {/* Window Controls: blue, red, green */}
-              <span className="w-3 h-3 rounded-full bg-blue-300 border border-blue-900 shadow-inner inline-block"></span>
-              <span className="w-3 h-3 rounded-full bg-red-300 border border-red-900 shadow-inner inline-block"></span>
-              <span className="w-3 h-3 rounded-full bg-green-300 border border-green-900 shadow-inner inline-block"></span>
+              <span className="w-3 h-3 rounded-full bg-blue-300 border border-blue-900"></span>
+              <span className="w-3 h-3 rounded-full bg-red-300 border border-red-900"></span>
+              <span className="w-3 h-3 rounded-full bg-green-300 border border-green-900"></span>
             </div>
-            <span
-              className="text-xs font-extrabold tracking-widest text-clay-900"
-              style={{
-                letterSpacing: '0.18em',
-                textShadow: '0 0 2px #fff, 0 0 1px #b98c6a',
-              }}
-            >
-              TOPIX LOGIN
-            </span>
-            <div className="w-8" /> {/* Spacer for symmetry */}
           </div>
 
-          {/* Main Content */}
+          {/* Login window */}
           <div className="p-8 bg-clay-50">
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 text-xs font-bold tracking-wide shadow-md">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6 text-xs font-bold">
                 {error}
               </div>
             )}
 
-            {/* Header & Toggle */}
+            {/* Toggle */}
             <div className="flex flex-col items-center mb-8">
               <h2
                 className="text-2xl font-extrabold text-clay-800 mb-1 tracking-wider uppercase"
@@ -126,15 +115,13 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
               >
                 {isLogin ? 'Welcome Back' : 'Create Account'}
               </h2>
-              <p className="text-clay-500 text-xs mb-4 tracking-widest">
-                {isLogin ? 'Sign in to your account' : 'Join our community'}
-              </p>
+              <p className="text-clay-500 text-xs mb-4 tracking-widest"></p>
               <div className="flex items-center bg-clay-200 rounded p-1 border border-clay-400">
                 <button
                   onClick={() => setIsLogin(true)}
-                  className={`px-4 py-1 rounded text-xs font-bold transition-all duration-200 tracking-widest uppercase border ${
+                  className={`px-4 py-1 rounded text-xs font-bold transition-all tracking-widest uppercase border ${
                     isLogin
-                      ? 'bg-clay-100 text-clay-800 border-clay-700 shadow'
+                      ? 'bg-clay-100 text-clay-800 border-clay-700'
                       : 'text-clay-400 border-transparent hover:text-clay-600'
                   }`}
                 >
@@ -144,7 +131,7 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   onClick={() => setIsLogin(false)}
                   className={`px-4 py-1 rounded text-xs font-bold transition-all duration-200 tracking-widest uppercase border ${
                     !isLogin
-                      ? 'bg-clay-200 text-clay-800 border-clay-400 shadow-md'
+                      ? 'bg-clay-200 text-clay-800 border-clay-400'
                       : 'text-clay-400 border-transparent hover:text-clay-600'
                   }`}
                 >
