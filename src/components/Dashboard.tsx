@@ -2,49 +2,20 @@ import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
-import { wsClient } from '../wsClient';
+import type {Message, ChatRoom, chatClient, User} from '../types';
 
 type TabType = 'private' | 'public' | 'invites';
 
 //TODO: get chat messages from db, then put them in an array with map
 //TODO: pass to chatwindow.tsx
 
-//* Websocket wrapper
-interface chatClient {
-  socket: WebSocket;
-  sendChatToServer: (message: Message, room: ChatRoom) => void;
-}
-
-interface Message {
-  mID?: string | number;
-  text: string;
-  sender: string | number;
-  timestamp: Date;
-  imgURL?: string | null;
-  isOwn?: boolean;
-}
-
-interface ChatRoom {
-  roomID: string | number;
-  name: string;
-  messages: Message[];
-}
-
-interface User {
-  userID: string | number;
-  userName: string;
-}
-
+//* A few states are getting pulled up from chatwindow like the current user and the websocket client
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
   const [chatClientWS, setChatClientWS] = useState<chatClient>();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [currentMessage, setcurrentMessage] = useState<string>('');
-  //*Creating fake user to connect to socket
-  const [currentUser, setCurrentUser] = useState<User>({
-    userID: Math.random(),
-    userName: 'Wenjun',
-  });
+  const [currentUser, setCurrentUser] = useState<User>();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
       roomID: 1,
@@ -66,19 +37,18 @@ const Dashboard = () => {
     (chat) => chat.roomID === selectedChat
   );
 
-  //placing this here
-  useEffect(() => {
-    const chatWS = wsClient(currentUser, (incomingMessage: Message) => {
-      setChatRooms((prevRooms) =>
-        prevRooms.map((room) =>
-          room.roomID === selectedChat
-            ? { ...room, messages: [...room.messages, incomingMessage] }
-            : room
-        )
-      );
-    });
-    setChatClientWS(chatWS);
-  }, [currentUser, selectedChat]);
+  // useEffect(() => {
+  //   const chatWS = wsClient(currentUser, (incomingMessage: Message) => {
+  //     setChatRooms((prevRooms) =>
+  //       prevRooms.map((room) =>
+  //         room.roomID === selectedChat
+  //           ? { ...room, messages: [...room.messages, incomingMessage] }
+  //           : room
+  //       )
+  //     );
+  //   });
+  //   setChatClientWS(chatWS);
+  // }, [currentUser, selectedChat]);
 
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
@@ -115,28 +85,30 @@ const Dashboard = () => {
   //   )
   // );
 
-  // async function getMessagesFromDB(){
-  //   console.log('loading messages');
-  //   const url = 'http://localhost:3000/getMessages';
+  async function getMessagesFromDB(){
+    console.log('loading messages');
+    const url = 'http://localhost:3000/getMessages';
 
-  //   try{
-  //     const response = await fetch(url);
-  //     if(!response.ok){
-  //       throw new Error(`Response status: ${response.status}`);
-  //     }
-  //     const json = await response.json();
-  //     console.log('res:',json);
-  //     //run map
-  //     // setChatRooms(chatRooms)
-  //   }catch(err){
-  //     console.log(err.message);
-  //   }
-  // }
+    try{
+      const response = await fetch(url);
+      if(!response.ok){
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const json = await response.json();
+      console.log('res:',json);
+    
+      //run map
+      // setChatRooms(chatRooms)
+      
+    }catch(err){
+      console.log(err.message);
+    }
+  }
 
   useEffect(()=>{
     // some function to request messages on load
     // getMessagesFromDB();
-  }, [])
+  }, []);
 
   return (
     <div className="w-full min-h-screen">
@@ -197,9 +169,12 @@ const Dashboard = () => {
                   <ChatWindow
                     roomName={selectedChatRoom?.name || ''}
                     messages={selectedChatRoom?.messages || []}
+                    chatrooms={setChatRooms}
+                    selectedChat={setSelectedChat}
                     onSendMessage={handleSendMessage}
                     currentMessage={setcurrentMessage}
-                    user={currentUser}
+                    chatClientWS={setChatClientWS}
+                    currentUser={setCurrentUser}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">

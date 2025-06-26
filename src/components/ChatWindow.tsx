@@ -1,38 +1,51 @@
 import { useState, useRef, useEffect } from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
-// import { wsClient } from '../wsClient';
+import { wsClient } from '../wsClient';
+import type {Message, ChatRoom, chatClient, User} from '../types';
+// import type { IncomingMessage } from 'http';
 
-interface Message {
-  mID?: string;
-  text: string;
-  sender: string;
-  timestamp: Date;
-  isOwn: boolean;
-}
-
-//user for websocket connection
-interface User {
-  userID: string;
-  userName: string;
-}
 
 interface ChatWindowProps {
   roomName?: string;
   messages?: Message[];
-  user: User;
-  currentMessage: (msg: string) => void;
+  currentUser: (cu:User)=>void;
+  chatrooms: (incomingMessage: React.SetStateAction<ChatRoom[]>) => void;
+  selectedChat: (sc: string | null) => void;
+  currentMessage: (msg:string) => void;
+  chatClientWS: (cc:chatClient) => chatClient;
   onSendMessage?: (message: string) => void;
 }
 
 const ChatWindow = ({
   roomName = 'General Chat',
   messages = [],
+  currentUser,
+  chatrooms,
+  chatClientWS,
   currentMessage,
   onSendMessage,
 }: ChatWindowProps) => {
   const [inputMessage, setInputMessage] = useState('');
+  const [chatroomID, setChatroomID] = useState<string | number>(1);
+  const [chatUser, setChatUser] = useState<User>({userID: Math.random(), userName: 'Mj'});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [currentChat, setCurrentChat] = useState<ChatRoom[]>([
+    {
+      roomID: 1,
+      name: 'Charizard',
+      messages: [
+        {
+          // mID: 4,
+          text: 'HEY',
+          sender: 1,
+          timestamp: new Date(Date.now() - 300000),
+          imgURL: null,
+          isOwn: false,
+        },
+      ],
+    },
+  ]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -60,6 +73,21 @@ const ChatWindow = ({
   useEffect(() => {
     currentMessage(inputMessage);
   }, [currentMessage, inputMessage]);
+  
+  //!mount chat client here. Its passing up to the state in dashboard
+  useEffect(()=>{
+    currentUser(chatUser);
+    chatClientWS(wsClient(chatUser, (incomingMessage: Message) => {
+      chatrooms((prevRooms) =>
+        prevRooms.map((room) =>
+          room.roomID === chatroomID
+            ? { ...room, messages: [...room.messages, incomingMessage] }
+            : room
+        )
+      );
+    }));
+  }, []);
+
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">

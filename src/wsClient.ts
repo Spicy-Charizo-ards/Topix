@@ -13,7 +13,7 @@ interface Payload {
 }
 
 interface User {
-    userID: string;
+    userID: string | number;
     userName: string;
 }
 
@@ -24,16 +24,16 @@ interface MessageData {
 
 //interfaces for some stuff i need for sending messages to server
 interface Message {
-    mID: string;
+    mID?: string | number;
     text: string;
-    sender: string;
+    sender: string | number;
     timestamp: Date;
-    imgURL: string | null;
-    isOwn: boolean;
-  }
+    imgURL?: string | null;
+    isOwn?: boolean;
+}
   
   interface ChatRoom {
-    roomID: string;
+    roomID: string | number;
     name: string;
     messages: Message[];
   }

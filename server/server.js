@@ -17,11 +17,6 @@ import {createRoom} from "./controllers/roomController.ts"
 import {createMessage} from "./controllers/messageController.ts"
 import { enterRoom } from './controllers/userController.ts';
 
-//TODO these need to be changed to es import format.
-// const cookieParser = require('cookie-parser');
-
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
@@ -79,9 +74,12 @@ wsServer.on('connection', (ws) => {
         //!: create a new user in db (registered user)
         switch(type){
             case 'JOIN_USER':
-                    console.log('info from payload: userID:',payload.userID);
+                    // console.log('info from payload: userID:',payload.userID);
                     //assign some sort of id to the client socket
                     ws.id = payload.userID
+
+                    console.log('whole load:', payload);
+                    console.log('user connected with id:', ws.id);
                     //add ws connection to the appropriate room
                     //put user in room on DB
                     enterRoom()
@@ -107,7 +105,7 @@ wsServer.on('connection', (ws) => {
                   }
                 }
 
-                broadcastMsg(JSON.stringify(msgToUser))
+                broadcastMsg(JSON.stringify(msgToUser), ws)
                 break;
             default:
                 break;
@@ -123,10 +121,11 @@ wsServer.on('connection', (ws) => {
 function broadcastMsg(messageToSend, ignoredSocket){
     wsServer.clients.forEach((client)=>{
         //as long as the socket is connected (its readyState is OPEN) AND it is not the socket that sent the message (ignoredSocket), send the message back to the other clients
-        if(client.readyState === WebSocket.OPEN && client !== ignoredSocket){
+        if(client.readyState === WebSocket.OPEN && client.id !== ignoredSocket.id){
             //check to see if the current client is included in the broadcast list
             // if(usersToBroadcast.includes(client)){
                 //send the message
+                console.log('broadcasting to:', client.id);
                 client.send(messageToSend);
             // }
         }
