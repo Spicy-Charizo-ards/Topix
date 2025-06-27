@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 /**
@@ -18,7 +18,7 @@ export const getRoomMesages = async (roomId) => {
         },
       },
       orderBy: {
-        createdAt: "asc",
+        createdAt: 'asc',
       },
       include: {
         author: {
@@ -31,13 +31,13 @@ export const getRoomMesages = async (roomId) => {
     });
     return messages;
   } catch (error) {
-    console.error("Error retrieving recent messages:", error);
-    return { error: "Failed to fetch recent messages." };
+    console.error('Error retrieving recent messages:', error);
+    return { error: 'Failed to fetch recent messages.' };
   }
 };
 
 /**
- * 
+ *
  * @param userId
  * @param roomId
  * @param content
@@ -48,7 +48,7 @@ export const createMessage = async (userId, roomId, content, imgUrl) => {
   try {
     // Validate input
     if (!content && !imgUrl) {
-      return { error: "Message must contain text or an image." };
+      return { error: 'Message must contain text or an image.' };
     }
 
     // Check that user exists and is active in the specified room
@@ -58,11 +58,11 @@ export const createMessage = async (userId, roomId, content, imgUrl) => {
     });
 
     if (!user) {
-      return { error: "User not found." };
+      return { error: 'User not found.' };
     }
 
     if (user.activeRoomId !== roomId) {
-      return { error: "User is not active in this room." };
+      return { error: 'User is not active in this room.' };
     }
 
     // Create the message
@@ -78,8 +78,8 @@ export const createMessage = async (userId, roomId, content, imgUrl) => {
 
     return { messageId: newMessage.id };
   } catch (error) {
-    console.error("Error creating message:", error);
-    return { error: "Failed to create message." };
+    console.error('Error creating message:', error);
+    return { error: 'Failed to create message.' };
   }
 };
 
