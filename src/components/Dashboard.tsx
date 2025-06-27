@@ -1,66 +1,114 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 import ChatWindow from './ChatWindow';
+import type {Message, ChatRoom, chatClient, User} from '../types';
 
 type TabType = 'private' | 'public' | 'invites';
 
-interface Message {
-  id: string;
-  text: string;
-  sender: string;
-  timestamp: Date;
-  isOwn: boolean;
-}
+//TODO: get chat messages from db, then put them in an array with map
+//TODO: pass to chatwindow.tsx
 
-interface ChatRoom {
-  id: string;
-  name: string;
-  messages: Message[];
-}
-
+//* A few states are getting pulled up from chatwindow like the current user and the websocket client
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
+  const [chatClientWS, setChatClientWS] = useState<chatClient>();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
-
+  const [currentMessage, setcurrentMessage] = useState<string>('');
+  const [currentUser, setCurrentUser] = useState<User>();
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
-      id: '1',
+      roomID: 1,
       name: 'Charizard',
       messages: [
         {
-          id: '1',
-          text: 'Hey everyone! I will not be here today.',
-          sender: 'Wenjun',
+          // mID: 4,
+          text: 'HEY',
+          sender: 1,
           timestamp: new Date(Date.now() - 300000),
+          imgURL: null,
           isOwn: false,
         },
       ],
     },
   ]);
 
-  const selectedChatRoom = chatRooms.find((chat) => chat.id === selectedChat);
+  const selectedChatRoom = chatRooms.find(
+    (chat) => chat.roomID === selectedChat
+  );
+
+  // useEffect(() => {
+  //   const chatWS = wsClient(currentUser, (incomingMessage: Message) => {
+  //     setChatRooms((prevRooms) =>
+  //       prevRooms.map((room) =>
+  //         room.roomID === selectedChat
+  //           ? { ...room, messages: [...room.messages, incomingMessage] }
+  //           : room
+  //       )
+  //     );
+  //   });
+  //   setChatClientWS(chatWS);
+  // }, [currentUser, selectedChat]);
 
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
 
+    //* index of sent message SHOULD be what is on the end of the array for chatRooms
     const newMessage: Message = {
-      id: Date.now().toString(),
+      //date time to make mid's unique
+      mID: Date.now().toString(),
       text: messageText,
-      sender: 'You',
+      sender: currentUser.userID,
       timestamp: new Date(),
       isOwn: true,
+      imgURL: null,
     };
 
-    // Update the selected chat room's messages
-    setChatRooms((prev) =>
-      prev.map((chat) =>
-        chat.id === selectedChat
-          ? { ...chat, messages: [...chat.messages, newMessage] }
-          : chat
+    //* SENDING MESSAGE TO SERVER USING SEND MESSAGE HANDLER
+    chatClientWS?.sendChatToServer(newMessage, selectedChatRoom);
+
+    // Update local state to show the new message immediately
+    setChatRooms((prevRooms) =>
+      prevRooms.map((room) =>
+        room.roomID === selectedChatRoom.roomID
+          ? { ...room, messages: [...room.messages, newMessage] }
+          : room
       )
     );
   };
+  //*This is for chatrooms
+  // setChatRooms((prev) =>
+  //   prev.map((chat) =>
+  //     chat.roomID === selectedChat
+  //       ? { ...chat, mID: [...chat.messages, newMessage] }
+  //       : chat
+  //   )
+  // );
+
+  async function getMessagesFromDB(){
+    console.log('loading messages');
+    const url = 'http://localhost:3000/getMessages';
+
+    try{
+      const response = await fetch(url);
+      if(!response.ok){
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const json = await response.json();
+      console.log('res:',json);
+    
+      //run map
+      // setChatRooms(chatRooms)
+      
+    }catch(err){
+      console.log(err.message);
+    }
+  }
+
+  useEffect(()=>{
+    // some function to request messages on load
+    // getMessagesFromDB();
+  }, []);
 
   return (
     <div className="w-full min-h-screen">
@@ -99,19 +147,17 @@ const Dashboard = () => {
                 <div className="space-y-2">
                   {chatRooms.map((chat) => (
                     <div
-                      key={chat.id}
-                      onClick={() => setSelectedChat(chat.id)}
+                      key={chat.roomID}
+                      onClick={() => setSelectedChat(chat.roomID)}
                       className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                        selectedChat === chat.id
-                          ? 'bg-stone-100'
-                          : ''
+                        selectedChat === chat.roomID ? 'bg-stone-100' : ''
                       }`}
                     >
                       <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-neutral-500 truncate">
-                            {chat.name}
-                          </h3>
-                        </div>
+                        <h3 className="font-medium text-neutral-500 truncate">
+                          {chat.name}
+                        </h3>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -123,7 +169,12 @@ const Dashboard = () => {
                   <ChatWindow
                     roomName={selectedChatRoom?.name || ''}
                     messages={selectedChatRoom?.messages || []}
+                    chatrooms={setChatRooms}
+                    selectedChat={setSelectedChat}
                     onSendMessage={handleSendMessage}
+                    currentMessage={setcurrentMessage}
+                    chatClientWS={setChatClientWS}
+                    currentUser={setCurrentUser}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">
