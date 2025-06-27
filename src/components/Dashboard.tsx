@@ -94,9 +94,9 @@ const Dashboard = () => {
       if(!response.ok){
         throw new Error(`Response status: ${response.status}`);
       }
-      const json = await response.json();
-      console.log('res:',json);
-      return json
+      const data = await response.json();
+      console.log('data:', data);
+      return data
       //run map
       // setChatRooms(chatRooms)
       
