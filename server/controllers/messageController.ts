@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 /**
@@ -6,38 +6,57 @@ const prisma = new PrismaClient();
  *
  * @param roomId
  */
-export const getRoomMesages = async (roomId) => {
+export const getRoomMesages = async (req, res, next) => {
   try {
+    const { roomId } = req.params;
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
-    const messages = await prisma.room.findMany({
+    const room = await prisma.room.findUnique({
       where: {
-        id: roomId,
-        createdAt: {
-          gte: tenMinutesAgo,
-        },
-      },
-      orderBy: {
-        createdAt: "asc",
+        id: Number(roomId),
       },
       include: {
-        author: {
+        creator: {
           select: {
-            id: true,
             username: true,
           },
         },
+        messages: {
+          // where: {
+          //   createdAt: {
+          //     gte: tenMinutesAgo,
+          //   },
+          // },
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+        activeUsers: {
+          select: {
+            id: true,
+            username: true
+          }
+        }, 
+
       },
-    });
-    return messages;
+  });
+
+    if (!room) {
+      return res.status(404).json({ error: "Room not found" });
+    }
+console.log("ROOM", room)
+    res.locals.roomMessages = room
+
+    next()
+
   } catch (error) {
     console.error("Error retrieving recent messages:", error);
-    return { error: "Failed to fetch recent messages." };
+    return res.status(500).json({ error: "Failed to fetch recent messages." });
   }
 };
 
 /**
- * 
+ *
  * @param userId
  * @param roomId
  * @param content
@@ -48,7 +67,7 @@ export const createMessage = async (userId, roomId, content, imgUrl) => {
   try {
     // Validate input
     if (!content && !imgUrl) {
-      return { error: "Message must contain text or an image." };
+      return { error: 'Message must contain text or an image.' };
     }
 
     // Check that user exists and is active in the specified room
@@ -58,11 +77,11 @@ export const createMessage = async (userId, roomId, content, imgUrl) => {
     });
 
     if (!user) {
-      return { error: "User not found." };
+      return { error: 'User not found.' };
     }
 
     if (user.activeRoomId !== roomId) {
-      return { error: "User is not active in this room." };
+      return { error: 'User is not active in this room.' };
     }
 
     // Create the message
@@ -78,8 +97,8 @@ export const createMessage = async (userId, roomId, content, imgUrl) => {
 
     return { messageId: newMessage.id };
   } catch (error) {
-    console.error("Error creating message:", error);
-    return { error: "Failed to create message." };
+    console.error('Error creating message:', error);
+    return { error: 'Failed to create message.' };
   }
 };
 

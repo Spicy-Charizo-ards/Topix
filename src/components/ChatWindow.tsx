@@ -1,20 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useRef, useEffect } from 'react';
-import { Avatar, IconButton } from '@mui/material';
+import { IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
 import { wsClient } from '../wsClient';
-import type {Message, ChatRoom, chatClient, User} from '../types';
+import type { Message, ChatRoom, chatClient, User } from '../types';
 // import type { IncomingMessage } from 'http';
-
 
 interface ChatWindowProps {
   roomName?: string;
   messages?: Message[];
-  currentUser: (cu:User)=>void;
+  currentUser: (cu: User) => void;
   chatrooms: (incomingMessage: React.SetStateAction<ChatRoom[]>) => void;
-  selectedChat: (sc: string | null) => void;
-  currentMessage: (msg:string) => void;
-  chatClientWS: (cc:chatClient) => void;
+  selectedChat: string | number | null;
+  currentMessage: (msg: string) => void;
+  chatClientWS: (cc: chatClient) => chatClient;
   onSendMessage?: (message: string) => void;
 }
 
@@ -26,10 +25,13 @@ const ChatWindow = ({
   chatClientWS,
   currentMessage,
   onSendMessage,
+  selectedChat,
 }: ChatWindowProps) => {
   const [inputMessage, setInputMessage] = useState('');
-  const [chatroomID, setChatroomID] = useState<string | number>(1);
-  const [chatUser, setChatUser] = useState<User>({userID: Math.random(), userName: 'Mj'});
+  const [chatUser, setChatUser] = useState<User>({
+    userID: Math.random(),
+    userName: 'Mj',
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentChat, setCurrentChat] = useState<ChatRoom[]>([
     {
@@ -74,35 +76,37 @@ const ChatWindow = ({
   useEffect(() => {
     currentMessage(inputMessage);
   }, [currentMessage, inputMessage]);
-  
-  //!mount chat client here. Its passing up to the state in dashboard
-  useEffect(()=>{
-    currentUser(chatUser);
-    chatClientWS(wsClient(chatUser, (incomingMessage: Message) => {
-      chatrooms((prevRooms) =>
-        prevRooms.map((room) =>
-          room.roomID === chatroomID
-            ? { ...room, messages: [...room.messages, incomingMessage] }
-            : room
-        )
-      );
-    }));
-  }, []);
 
+  //!mount chat client here. Its passing up to the state in dashboard
+  useEffect(() => {
+    currentUser(chatUser);
+    chatClientWS(
+      wsClient(chatUser, (incomingMessage: Message) => {
+        chatrooms((prevRooms) =>
+          prevRooms.map((room) =>
+            room.roomID === selectedChat
+              ? { ...room, messages: [...room.messages, incomingMessage] }
+              : room
+          )
+        );
+      })
+    );
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-orange-950 rounded-t-lg">
-        <div className="flex items-center">
-          <h3 className="font-medium">{roomName}</h3>
-        </div>
-      </div>
+      <div
+        style={{
+          fontFamily:
+            'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+        }}
+      ></div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-clay-100 border-b-2 border-clay-200">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-8">
+          <div className="text-center text-clay-400 mt-8">
             <p>No messages yet. Start the conversation!</p>
           </div>
         ) : (
@@ -120,25 +124,33 @@ const ChatWindow = ({
                 }`}
               >
                 {!message.isOwn && (
-                  <Avatar className="w-8 h-8 mr-2 flex-shrink-0" />
+                  <div className="w-8 h-8 bg-clay-300 rounded flex items-center justify-center text-clay-800 font-bold mr-2">
+                    <span>{message.sender}</span>
+                  </div>
                 )}
                 <div
-                  className={`px-4 py-2 rounded-lg ${
+                  className={`px-4 py-2 rounded border-2 ${
                     message.isOwn
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
+                      ? 'bg-clay-700 text-clay-50 border-clay-900'
+                      : 'bg-clay-200 text-clay-900 border-clay-400'
+                  } shadow-sm`}
+                  style={{
+                    fontFamily:
+                      'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                  }}
                 >
                   <p className="text-sm">{message.text}</p>
                   <p
                     className={`text-xs mt-1 ${
-                      message.isOwn ? 'text-blue-100' : 'text-gray-500'
+                      message.isOwn ? 'text-clay-200' : 'text-clay-500'
                     }`}
                   >
-                    {message.timestamp.toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {message.timestamp instanceof Date
+                      ? message.timestamp.toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : ''}
                   </p>
                 </div>
               </div>
@@ -149,21 +161,21 @@ const ChatWindow = ({
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t bg-gray-50 rounded-b-lg">
+      <div className="p-4 border-t-2 border-clay-400 bg-clay-50 rounded-b-lg">
         <div className="flex items-center space-x-2">
           <textarea
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type a message..."
-            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none bg-neutral-300 text-black placeholder-gray-600"
+            className="flex-1 p-3 border-2 border-clay-400 rounded bg-clay-100 text-black placeholder-clay-400 text-sm font-mono resize-none focus:ring-1 focus:ring-clay-400 focus:border-clay-700 outline-none"
             rows={1}
             style={{ minHeight: '44px', maxHeight: '120px' }}
           />
           <IconButton
             onClick={handleSendMessage}
             disabled={!inputMessage.trim()}
-            className="text-n disabled:bg-gray-300"
+            className="text-clay-700 bg-clay-200 border-2 border-clay-400 rounded hover:bg-clay-300 disabled:bg-clay-100"
             size="small"
           >
             <Send />
