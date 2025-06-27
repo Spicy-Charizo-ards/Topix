@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useRef, useEffect } from 'react';
 import { Avatar, IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
@@ -13,7 +14,7 @@ interface ChatWindowProps {
   chatrooms: (incomingMessage: React.SetStateAction<ChatRoom[]>) => void;
   selectedChat: (sc: string | null) => void;
   currentMessage: (msg:string) => void;
-  chatClientWS: (cc:chatClient) => chatClient;
+  chatClientWS: (cc:chatClient) => void;
   onSendMessage?: (message: string) => void;
 }
 

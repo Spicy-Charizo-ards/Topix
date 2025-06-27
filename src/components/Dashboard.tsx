@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { Chat, Public, Mail } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
@@ -13,9 +14,12 @@ type TabType = 'private' | 'public' | 'invites';
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState<TabType>('private');
   const [chatClientWS, setChatClientWS] = useState<chatClient>();
-  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [selectedChat, setSelectedChat] = useState<string | number | null>(null);
   const [currentMessage, setcurrentMessage] = useState<string>('');
-  const [currentUser, setCurrentUser] = useState<User>();
+  const [currentUser, setCurrentUser] = useState<User>({
+    userID: 1,
+    userName: ''
+  });
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
       roomID: 1,
@@ -86,7 +90,6 @@ const Dashboard = () => {
   // );
 
   async function getMessagesFromDB(){
-    console.log('loading messages');
     const url = 'http://localhost:3000/getMessages';
 
     try{
@@ -95,19 +98,23 @@ const Dashboard = () => {
         throw new Error(`Response status: ${response.status}`);
       }
       const json = await response.json();
-      console.log('res:',json);
+
+      await setTimeout(()=>{
+        console.log('res:', json);
+      }, 1000);
     
       //run map
-      // setChatRooms(chatRooms)
       
-    }catch(err){
+      
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    }catch(err:any){
       console.log(err.message);
     }
   }
 
   useEffect(()=>{
     // some function to request messages on load
-    // getMessagesFromDB();
+    getMessagesFromDB();
   }, []);
 
   return (
