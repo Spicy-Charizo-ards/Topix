@@ -7,10 +7,15 @@ const prisma = new PrismaClient();
  * Creates a new user on sign-up
  * @param email
  * @param username
- * @param name
+ * @param password
  * @returns
  */
-export const createUser = async (name, email, username, password) => {
+export const createUser = async (
+  name: string,
+  email: string,
+  username: string,
+  password: string
+) => {
   try {
     // check for existing user with the same email
     const existingUser = await prisma.user.findUnique({ where: { email } });
