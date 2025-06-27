@@ -100,8 +100,7 @@ const ChatWindow = ({
           fontFamily:
             'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
         }}
-      >
-      </div>
+      ></div>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-clay-100 border-b-2 border-clay-200">
@@ -125,7 +124,7 @@ const ChatWindow = ({
               >
                 {!message.isOwn && (
                   <div className="w-8 h-8 bg-clay-300 rounded flex items-center justify-center text-clay-800 font-bold mr-2">
-                    <span>U</span>
+                    <span>{message.sender}</span>
                   </div>
                 )}
                 <div

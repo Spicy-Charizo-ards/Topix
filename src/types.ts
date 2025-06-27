@@ -1,17 +1,17 @@
 //* Websocket wrapper
 export interface Message {
-    mID?: string | number;
-    text: string;
-    sender: string | number;
-    timestamp: Date;
-    imgURL?: string | null;
-    isOwn?: boolean;
+  mID?: string | number;
+  text: string;
+  sender: string | number;
+  timestamp: Date;
+  imgURL?: string | null;
+  isOwn?: boolean;
 }
 
 export interface ChatRoom {
-    roomID: string | number;
-    name: string;
-    messages: Message[];
+  roomID: string | number;
+  name: string;
+  messages: Message[];
 }
 
 // Authentication user interface
@@ -24,8 +24,8 @@ export interface AuthUser {
 
 //user for websocket connection
 export interface User {
-    userID: string | number;
-    userName: string;
+  userID: string | number;
+  userName: string;
 }
 
 //* Websocket wrapper
