@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
  *  Retrieves all active public rooms.
  * @returns - List of all active public rooms
  */
-export const getRooms = async () => {
+export const getRooms = async (req, res, next) => {
   try {
     // query room table for all active rooms
     const rooms = await prisma.room.findMany({
@@ -15,6 +15,7 @@ export const getRooms = async () => {
       select: {
         id: true,
         name: true,
+        description: true,
         activeUsers: {
           select: { id: true },
         },
@@ -22,16 +23,18 @@ export const getRooms = async () => {
     });
 
     // flatten object and reassign usercount to length of activeUsers array
-    const formattedData = rooms.map((room) => ({
+    const formattedRooms = rooms.map((room) => ({
       id: room.id,
       name: room.name,
+      description: room.description,
       userCount: room.activeUsers.length,
     }));
 
-    return { rooms: formattedData };
+    res.locals.rooms = formattedRooms;
+    next();
   } catch (error) {
     console.error("Error fetching rooms:", error);
-    return { error: "Could not fetch rooms." };
+    return res.status(500).json({ error: "Could not fetch rooms." });
   }
 };
 
@@ -42,15 +45,10 @@ export const getRooms = async () => {
  * @param roomDescription
  * @returns
  */
-export const createRoom = async (
-  userId,
-  roomName,
-  roomDescription = null
-  // isPrivate,
-  // passwordPrompt,
-  // password
-) => {
+export const createRoom = async (req, res, next) => {
   try {
+    const { userId, roomName, roomDescription } = req.body;
+
     // validate user input
     if (!userId || !roomName) {
       return { error: "Missing required fields." };
@@ -72,7 +70,7 @@ export const createRoom = async (
       data: {
         creatorId: userId,
         name: roomName,
-        description: roomDescription,
+        description: roomDescription || null,
         isPrivate: false,
       },
       select: {

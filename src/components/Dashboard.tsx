@@ -89,9 +89,40 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
   //   )
   // );
 
+  async function getMessagesFromDB(){
+    console.log('loading messages');
+    const url = 'http://localhost:3000/rooms/1';
+
+    try{
+      const response = await fetch(url);
+      if(!response.ok){
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('data:', data);
+      return data
+      //run map
+      // setChatRooms(chatRooms)
+      
+    } catch(err){
+      console.log(err.message);
+      throw err
+    }
+  }
+
   useEffect(() => {
-    // some function to request messages on load
-    // getMessagesFromDB();
+    const fetchMessages = async () => {
+      try {
+        console.log("FETCHING MESSAGES");
+        const messages = await getMessagesFromDB();
+        console.log("MESSAGES", messages);
+        // Do something with messages here (like setting state)
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
+    };
+  
+    fetchMessages();
   }, []);
 
   return (
