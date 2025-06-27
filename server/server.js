@@ -169,7 +169,7 @@ app.use('/test', async (req, res) => {
 })
 
 //! add catch all error handler for incorrect routes
-app.use((req, res) => res.status(404).send('This is not the page you\re looking for.'))
+app.use((req, res) => res.status(404).send("This is not the page you're looking for."))
 
 
 
