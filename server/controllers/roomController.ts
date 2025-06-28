@@ -51,7 +51,7 @@ export const createRoom = async (req, res, next) => {
 
     // validate user input
     if (!userId || !roomName) {
-      return { error: "Missing required fields." };
+      return res.status(400).json({ error: "Missing required fields." });
     }
 
     // prevent duplicate active rooms room names
@@ -61,8 +61,9 @@ export const createRoom = async (req, res, next) => {
         isActive: true,
       },
     });
+
     if (existingRoom) {
-      return { error: "A room with that name already exists" };
+      return res.status(409).json({ error: "A room with that name already exists" });
     }
 
     // create new room using user inputs
@@ -86,10 +87,12 @@ export const createRoom = async (req, res, next) => {
       },
     });
 
+    res.locals.createdRoom = newRoom;
+
     // return roomId
-    return { roomId: newRoom.id };
+    return next()
   } catch (error) {
     console.error("Error creating public room:", error);
-    return { error: "Could not create room." };
+    return next(error);
   }
 };
