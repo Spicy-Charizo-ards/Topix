@@ -42,19 +42,6 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
     (chat) => chat.roomID === selectedChat
   );
 
-  // useEffect(() => {
-  //   const chatWS = wsClient(currentUser, (incomingMessage: Message) => {
-  //     setChatRooms((prevRooms) =>
-  //       prevRooms.map((room) =>
-  //         room.roomID === selectedChat
-  //           ? { ...room, messages: [...room.messages, incomingMessage] }
-  //           : room
-  //       )
-  //     );
-  //   });
-  //   setChatClientWS(chatWS);
-  // }, [currentUser, selectedChat]);
-
   const handleSendMessage = (messageText: string) => {
     if (!selectedChatRoom) return;
 
@@ -81,14 +68,6 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
       )
     );
   };
-  //*This is for chatrooms
-  // setChatRooms((prev) =>
-  //   prev.map((chat) =>
-  //     chat.roomID === selectedChat
-  //       ? { ...chat, mID: [...chat.messages, newMessage] }
-  //       : chat
-  //   )
-  // );
 
   async function getMessagesFromDB(){
     console.log('loading messages');
@@ -105,8 +84,8 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
       //run map
       
       
-    } catch(err){
-      console.log(err.message);
+    } catch(err: unknown){
+      console.log(err);
       throw err
     }
   }

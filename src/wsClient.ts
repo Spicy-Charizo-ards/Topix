@@ -1,42 +1,44 @@
+import type { Message, ChatRoom, User, MessageData } from './types';
+
 //* websocket client connection module.
 //* I built it here so that it can be plugged in wherever it needs to go without messing over someone else's files
 //* inside there are notes for what everything is and does
 
 //TODO: make interfaces for the messages for type safety
-interface Payload {
-    msgID?: string | number;
-    message?: string;
-    user?: string | number;
-    timestamp?: Date;
-    imgURL: string | null | undefined;
-    roomName?: string | number;
-}
+// interface Payload {
+//     msgID?: string | number;
+//     message?: string;
+//     user?: string | number;
+//     timestamp?: Date;
+//     imgURL: string | null | undefined;
+//     roomName?: string | number;
+// }
 
-interface User {
-    userID: string | number;
-    userName: string;
-}
+// interface User {
+//     userID: string | number;
+//     userName: string;
+// }
 
-interface MessageData {
-    type: string;
-    payload?: Payload;
-}
+// interface MessageData {
+//     type: string;
+//     payload?: Payload;
+// }
 
 //interfaces for some stuff i need for sending messages to server
-interface Message {
-    mID?: string | number;
-    text: string;
-    sender: string | number;
-    timestamp: Date;
-    imgURL?: string | null;
-    isOwn?: boolean;
-}
+// interface Message {
+//     mID?: string | number;
+//     text: string;
+//     sender: string | number;
+//     timestamp: Date;
+//     imgURL?: string | null;
+//     isOwn?: boolean;
+// }
   
-  interface ChatRoom {
-    roomID: string | number;
-    name: string;
-    messages: Message[];
-  }
+  // interface ChatRoom {
+  //   roomID: string | number;
+  //   name: string;
+  //   messages: Message[];
+  // }
 
   
   //handles websocket connection logic "what is the client sending to the server and how will it handle what it gets back"
