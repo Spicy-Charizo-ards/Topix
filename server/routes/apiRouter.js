@@ -15,7 +15,7 @@ apiRouter.get('/rooms', getRooms, (req,res) => {
 
 // CREATE A ROOM
 apiRouter.post('/rooms', createRoom, (req, res)=> {
-    return res.status(201).json({room: res.locals.room});
+    return res.status(201).json({room: res.locals.createdRoom});
 
 });
 

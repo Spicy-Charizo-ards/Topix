@@ -142,8 +142,8 @@ app.use('/test', async (req, res) => {
   }
 
   const mockRoom = {
-    name: "Paddy's Pub",
-    description: "The official chat room of the Gang. Expect chaos.",
+    name: "Keynote Chat - Future of Gaming",
+    description: "Discuss the opening keynote and share your thoughts.",
     creatorId: 1,
   };
 
@@ -159,13 +159,13 @@ app.use('/test', async (req, res) => {
   // console.log({createdUser})
   // return res.send({data: createdUser})
   
-  // const createdRoom = await createRoom(1, mockRoom.name, mockRoom.description)
-  // console.log(createdRoom)
-  // return res.send({data: createdRoom})
+  const createdRoom = await createRoom()
+  console.log(createdRoom)
+  return res.send({data: createdRoom})
   
-  const createdMessage = await createMessage(1, 1, mockMessage.content)
-  console.log(createdMessage)
-  return res.send({data: createdMessage})
+  // const createdMessage = await createMessage(1, 1, mockMessage.content)
+  // console.log(createdMessage)
+  // return res.send({data: createdMessage})
 })
 
 //! add catch all error handler for incorrect routes

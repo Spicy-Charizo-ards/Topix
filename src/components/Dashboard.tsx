@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from 'react';
-import { Chat, Public, Mail } from '@mui/icons-material';
-import ChatWindow from './ChatWindow';
-import type { Message, ChatRoom, chatClient, AuthUser } from '../types';
+import { useEffect, useState } from "react";
+import { Chat, Public, Mail } from "@mui/icons-material";
+import ChatWindow from "./ChatWindow";
+import RoomCard from "./RoomCard";
+import type { Message, ChatRoom, chatClient, AuthUser } from "../types";
 
-type TabType = 'private' | 'public' | 'invites';
+type TabType = "private" | "public" | "invites";
 
 interface DashboardProps {
   currentUser: AuthUser;
@@ -16,19 +17,20 @@ interface DashboardProps {
 
 //* A few states are getting pulled up from chatwindow like the current user and the websocket client
 const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>('private');
+  const [activeTab, setActiveTab] = useState<TabType>("private");
   const [chatClientWS, setChatClientWS] = useState<chatClient>();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   // const [currentMessage, setcurrentMessage] = useState<string>('');
   // const [currentUser, setCurrentUser] = useState<User>();
+  const [allChatRooms, setAllChatRooms] = useState([]);
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([
     {
-      roomID: '1',
-      name: 'Charizard',
+      roomID: "1",
+      name: "Charizard",
       messages: [
         {
           // mID: 4,
-          text: 'HEY',
+          text: "HEY",
           sender: 1,
           timestamp: new Date(Date.now() - 300000),
           imgURL: null,
@@ -69,41 +71,69 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
     );
   };
 
-  async function getMessagesFromDB(){
-    console.log('loading messages');
-    const url = 'http://localhost:3000/rooms/1';
+  async function getMessagesFromDB() {
+    // console.log("loading messages");
+    const url = "http://localhost:3000/rooms/1";
 
-    try{
+    try {
       const response = await fetch(url);
-      if(!response.ok){
+      if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
       const data = await response.json();
-      console.log('data:', data);
-      return data
+      // console.log('data:', data);
+      return data;
       //run map
-      
-      
-    } catch(err: unknown){
+    } catch (err: unknown) {
       console.log(err);
-      throw err
+      throw err;
+    }
+  }
+  async function getRooms() {
+    // console.log("loading rooms");
+    const url = "http://localhost:3000/rooms";
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const data = await response.json();
+      setAllChatRooms(data.rooms);
+      // console.log('ROOMS:', data);
+      return data;
+      //run map
+    } catch (err: unknown) {
+      console.log(err);
+      throw err;
     }
   }
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        console.log("FETCHING MESSAGES");
         const messages = await getMessagesFromDB();
-        console.log("MESSAGES", messages);
+        // console.log("MESSAGES", messages);
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
+    };
+
+    const fetchRooms = async () => {
+      try {
+        const rooms = await getRooms();
+        // console.log("ROOMS", rooms);
         // Do something with messages here (like setting state)
       } catch (error) {
         console.error("Failed to fetch messages:", error);
       }
     };
-  
+
+    fetchRooms();
     fetchMessages();
   }, []);
+
+  console.log("ROOMS IN STATE:", allChatRooms);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-clay-200 py-8 px-2 font-mono">
@@ -115,7 +145,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
             className="flex items-center justify-between px-3 py-1 bg-clay-400 border-clay-700 select-none"
             style={{
               fontFamily:
-                'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                "monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
             }}
           >
             <div className="flex items-center gap-2">
@@ -132,38 +162,38 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
               className="w-full bg-clay-200 border-b-2 border-clay-400 px-4 py-2 flex items-center justify-between"
               style={{
                 fontFamily:
-                  'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                  "monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
               }}
             >
               <div className="flex gap-2 md:gap-4">
                 <button
-                  onClick={() => setActiveTab('private')}
+                  onClick={() => setActiveTab("private")}
                   className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-bold tracking-widest uppercase border border-clay-400 transition-colors ${
-                    activeTab === 'private'
-                      ? 'bg-clay-100 text-clay-800 border-clay-700 shadow'
-                      : 'text-clay-500 hover:bg-clay-100 hover:text-clay-700'
+                    activeTab === "private"
+                      ? "bg-clay-100 text-clay-800 border-clay-700 shadow"
+                      : "text-clay-500 hover:bg-clay-100 hover:text-clay-700"
                   }`}
                 >
                   <Chat fontSize="small" />
-                  <span className="hidden sm:inline">Private Chats</span>
+                  <span className="hidden sm:inline">Joined Chats</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab('public')}
+                  onClick={() => setActiveTab("public")}
                   className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-bold tracking-widest uppercase border border-clay-400 transition-colors ${
-                    activeTab === 'public'
-                      ? 'bg-clay-100 text-clay-800 border-clay-700 shadow'
-                      : 'text-clay-500 hover:bg-clay-100 hover:text-clay-700'
+                    activeTab === "public"
+                      ? "bg-clay-100 text-clay-800 border-clay-700 shadow"
+                      : "text-clay-500 hover:bg-clay-100 hover:text-clay-700"
                   }`}
                 >
                   <Public fontSize="small" />
                   <span className="hidden sm:inline">Public Chats</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab('invites')}
+                  onClick={() => setActiveTab("invites")}
                   className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-bold tracking-widest uppercase border border-clay-400 transition-colors ${
-                    activeTab === 'invites'
-                      ? 'bg-clay-100 text-clay-800 border-clay-700 shadow'
-                      : 'text-clay-500 hover:bg-clay-100 hover:text-clay-700'
+                    activeTab === "invites"
+                      ? "bg-clay-100 text-clay-800 border-clay-700 shadow"
+                      : "text-clay-500 hover:bg-clay-100 hover:text-clay-700"
                   }`}
                 >
                   <Mail fontSize="small" />
@@ -182,7 +212,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                   className="flex items-center gap-2 px-3 py-1 text-xs font-bold tracking-widest uppercase border border-clay-400 rounded bg-clay-700 text-clay-50 hover:bg-clay-800 transition-colors"
                   style={{
                     fontFamily:
-                      'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                      "monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
                   }}
                 >
                   <svg
@@ -205,13 +235,13 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
 
             {/* Content Area */}
             <div className="w-full px-2 md:px-4 py-4">
-              {activeTab === 'private' && (
+              {activeTab === "private" && (
                 <div className="w-full bg-clay-100 rounded border-2 border-clay-300 p-2 md:p-6">
                   <h2
                     className="text-lg text-clay-800 font-bold mb-4 tracking-widest uppercase"
                     style={{
                       fontFamily:
-                        'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                        "monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
                     }}
                   >
                     Your Chats
@@ -228,8 +258,8 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                             }
                             className={`flex items-center p-2 md:p-3 rounded cursor-pointer border border-clay-200 hover:bg-clay-200 transition-colors ${
                               selectedChat === chat.roomID.toString()
-                                ? 'bg-clay-200 border-clay-400'
-                                : ''
+                                ? "bg-clay-200 border-clay-400"
+                                : ""
                             }`}
                           >
                             <div className="flex-1 min-w-0">
@@ -237,7 +267,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                                 className="font-bold text-clay-700 truncate"
                                 style={{
                                   fontFamily:
-                                    'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                                    "monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
                                 }}
                               >
                                 {chat.name}
@@ -252,7 +282,7 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                     <div className="w-3/4 pl-2 md:pl-4">
                       {selectedChat ? (
                         <ChatWindow
-                          roomName={selectedChatRoom?.name || ''}
+                          roomName={selectedChatRoom?.name || ""}
                           messages={selectedChatRoom?.messages || []}
                           chatrooms={setChatRooms}
                           selectedChat={selectedChat}
@@ -276,19 +306,40 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                   </div>
                 </div>
               )}
-              {activeTab === 'public' && (
+              {activeTab === "public" && (
                 <div className="w-full bg-clay-100 rounded border-2 border-clay-300 shadow p-2 md:p-6">
                   <h2
                     className="text-lg text-clay-800 font-bold mb-4 tracking-widest uppercase"
                     style={{
                       fontFamily:
-                        'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                        "monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
                     }}
                   >
                     Popular Topics
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="p-4 border-2 border-clay-200 rounded bg-clay-50">
+                    {allChatRooms && allChatRooms.map((room: any)=> {
+                      // console.log('ROOM In MAP', room);
+                      const randomUserCount = Math.random()*10
+                      const data = {
+                        id: room.id,
+                        name: room.name, 
+                        description: room.description, 
+                        userCount: randomUserCount.toFixed(1)
+                      }
+                      // console.log("TEST", room.name);
+                      return <RoomCard roomData={data} /> 
+                    })}
+                    {/* <RoomCard
+                      roomData={{
+                        id: 2,
+                        name: "Merch Trading Post",
+                        description:
+                          "Trade pins, posters, and other convention swag.",
+                        userCount: 0,
+                      }}
+                    /> */}
+                    {/* <div className="p-4 border-2 border-clay-200 rounded bg-clay-50">
                       <h3 className="text-clay-800 font-bold">Technology</h3>
                       <p className="text-xs text-clay-500">1.2k members</p>
                     </div>
@@ -299,17 +350,17 @@ const Dashboard = ({ currentUser, onLogout }: DashboardProps) => {
                     <div className="p-4 border-2 border-clay-200 rounded bg-clay-50">
                       <h3 className="text-clay-800 font-bold">Music</h3>
                       <p className="text-xs text-clay-500">2.8k members</p>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               )}
-              {activeTab === 'invites' && (
+              {activeTab === "invites" && (
                 <div className="w-full bg-clay-100 rounded border-2 border-clay-300 shadow p-2 md:p-6">
                   <h2
                     className="text-lg text-clay-800 font-bold mb-4 tracking-widest uppercase"
                     style={{
                       fontFamily:
-                        'monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',
+                        "monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace",
                     }}
                   >
                     Chat Invitations
