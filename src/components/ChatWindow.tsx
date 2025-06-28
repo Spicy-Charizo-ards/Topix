@@ -33,6 +33,7 @@ const ChatWindow = ({
     userName: 'guest',
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatClientRef = useRef<chatClient | null>(null);
   const [currentChat, setCurrentChat] = useState<ChatRoom[]>([
     {
       roomID: 1,
@@ -80,17 +81,22 @@ const ChatWindow = ({
   //!mount chat client here. Its passing up to the state in dashboard
   useEffect(() => {
     currentUser(chatUser);
-    chatClientWS(
-      wsClient(chatUser, (incomingMessage: Message) => {
-        chatrooms((prevRooms) =>
-          prevRooms.map((room) =>
-            room.roomID === selectedChat
-              ? { ...room, messages: [...room.messages, incomingMessage] }
-              : room
-          )
-        );
-      })
-    );
+
+    if (!chatClientRef.current) {
+      const client = chatClientWS(
+        wsClient(chatUser, (incomingMessage: Message) => {
+          chatrooms((prevRooms) =>
+            prevRooms.map((room) =>
+              room.roomID === selectedChat
+                ? { ...room, messages: [...room.messages, incomingMessage] }
+                : room
+            )
+          );
+        })
+      );
+      chatClientRef.current = client;
+      chatClientWS(client);
+    }
   }, []);
 
   return (
