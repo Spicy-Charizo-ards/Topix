@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useRef, useEffect } from 'react';
 import { IconButton } from '@mui/material';
 import { Send } from '@mui/icons-material';
@@ -17,7 +18,7 @@ interface ChatWindowProps {
 }
 
 const ChatWindow = ({
-  roomName = 'General Chat',
+  // roomName = 'General Chat',
   messages = [],
   currentUser,
   chatrooms,
@@ -29,7 +30,7 @@ const ChatWindow = ({
   const [inputMessage, setInputMessage] = useState('');
   const [chatUser, setChatUser] = useState<User>({
     userID: Math.random(),
-    userName: 'Mj',
+    userName: 'guest',
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentChat, setCurrentChat] = useState<ChatRoom[]>([

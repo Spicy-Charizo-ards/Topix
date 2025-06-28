@@ -54,7 +54,8 @@ export const getUser = async (username, password) => {
   try {
     // check user table for matching user 
     const user = await prisma.user.findUnique({
-      where: { username: username },
+      //*This now checks for email because, though username is on the schema, prisma's findUnique method doesnt allow for us to use username, it requires id or email to be used.
+      where: { email: username },
     });
 
     if (!user) {

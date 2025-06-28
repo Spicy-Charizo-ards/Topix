@@ -186,7 +186,7 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   htmlFor="username"
                   className="block text-base font-bold text-clay-700 mb-2 tracking-wider"
                 >
-                  Username
+                  Email
                 </label>
                 <input
                   id="username"
@@ -196,7 +196,7 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                   value={infoData.username}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-clay-400 rounded-md focus:ring-2 focus:ring-clay-400 focus:border-clay-500 bg-clay-100 text-clay-900 placeholder-clay-400 transition-colors text-sm shadow-[inset_2px_2px_6px_0_rgba(160,109,75,0.10)] outline-none"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                 />
               </div>
 

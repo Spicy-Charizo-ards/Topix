@@ -1,42 +1,44 @@
+import type { Message, ChatRoom, User, MessageData } from './types';
+
 //* websocket client connection module.
 //* I built it here so that it can be plugged in wherever it needs to go without messing over someone else's files
 //* inside there are notes for what everything is and does
 
 //TODO: make interfaces for the messages for type safety
-interface Payload {
-    msgID?: string;
-    message?: string;
-    user?: string;
-    timestamp?: Date;
-    imgURL: string | null;
-    roomName?: string;
-}
+// interface Payload {
+//     msgID?: string | number;
+//     message?: string;
+//     user?: string | number;
+//     timestamp?: Date;
+//     imgURL: string | null | undefined;
+//     roomName?: string | number;
+// }
 
-interface User {
-    userID: string | number;
-    userName: string;
-}
+// interface User {
+//     userID: string | number;
+//     userName: string;
+// }
 
-interface MessageData {
-    type: string;
-    payload?: Payload;
-}
+// interface MessageData {
+//     type: string;
+//     payload?: Payload;
+// }
 
 //interfaces for some stuff i need for sending messages to server
-interface Message {
-    mID?: string | number;
-    text: string;
-    sender: string | number;
-    timestamp: Date;
-    imgURL?: string | null;
-    isOwn?: boolean;
-}
+// interface Message {
+//     mID?: string | number;
+//     text: string;
+//     sender: string | number;
+//     timestamp: Date;
+//     imgURL?: string | null;
+//     isOwn?: boolean;
+// }
   
-  interface ChatRoom {
-    roomID: string | number;
-    name: string;
-    messages: Message[];
-  }
+  // interface ChatRoom {
+  //   roomID: string | number;
+  //   name: string;
+  //   messages: Message[];
+  // }
 
   
   //handles websocket connection logic "what is the client sending to the server and how will it handle what it gets back"
@@ -127,7 +129,7 @@ interface Message {
           //* logging the message to browser console but this would go in the chat as a server message or something
           console.log('a new user has entered the chat!');
           break;
-        case 'NEW_MESSAGE':
+        case 'NEW_MESSAGE':{
           //* logging to browser console but this is a message from another user that got broadcast to the chat room from server.
           console.log('Received message from server:', payload.message);
 
@@ -140,12 +142,12 @@ interface Message {
             imgURL: payload.imgURL || null,
             isOwn: payload.user === userID, // Check if this message is from the current user
           };
-
           // Call the callback to update the UI with the new message
           if (onMessageReceived) {
             onMessageReceived(frontendMessage);
           }
           break;
+        }
         default:
           break;
       }
