@@ -38,7 +38,7 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
 
       const endpoint = isLogin ? '/auth/login' : '/auth/signup';
       const payload = isLogin
-        ? { username: infoData.username, password: infoData.password }
+        ? { username: infoData.email, password: infoData.password }
         : {
             name: infoData.name,
             email: infoData.email,
@@ -166,34 +166,34 @@ const Auth = ({ onAuthSuccess }: AuthProps) => {
                     htmlFor="email"
                     className="block text-base font-bold text-clay-700 mb-2 tracking-wider"
                   >
-                    Email Address
+                    Username
                   </label>
                   <input
-                    id="email"
-                    name="email"
-                    type="email"
+                    id="username"
+                    name="username"
+                    type="text"
                     required
-                    value={infoData.email}
+                    value={infoData.username}
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-clay-400 rounded-md focus:ring-2 focus:ring-clay-400 focus:border-clay-500 bg-clay-100 text-clay-900 placeholder-clay-400 transition-colors text-sm shadow-[inset_2px_2px_6px_0_rgba(160,109,75,0.10)] outline-none"
-                    placeholder="Enter your email"
+                    placeholder="Enter your username"
                   />
                 </div>
               )}
 
               <div>
                 <label
-                  htmlFor="username"
+                  htmlFor="email"
                   className="block text-base font-bold text-clay-700 mb-2 tracking-wider"
                 >
                   Email
                 </label>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  value={infoData.username}
+                  value={infoData.email}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-clay-400 rounded-md focus:ring-2 focus:ring-clay-400 focus:border-clay-500 bg-clay-100 text-clay-900 placeholder-clay-400 transition-colors text-sm shadow-[inset_2px_2px_6px_0_rgba(160,109,75,0.10)] outline-none"
                   placeholder="Enter your email"
